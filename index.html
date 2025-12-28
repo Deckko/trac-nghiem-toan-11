@@ -3,365 +3,340 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toán 11 AI Pro - Update</title>
+    <title>Hệ Thống Trắc Nghiệm Toán 11 - Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore-compat.js"></script>
     
-    <!-- MathJax Configuration -->
-    <script>
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                processEscapes: true
-            },
-            options: {
-                enableMenu: false,
-                renderActions: {
-                    addMenu: []
-                }
-            },
-            startup: {
-                typeset: true
-            }
-        };
-    </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <!-- KaTeX cho công thức toán -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMath()"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        
-        :root { --primary: #6366f1; --bg: #0f172a; }
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg);
-            background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0px, transparent 50%);
-            color: #f8fafc;
-            min-height: 100vh;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
+        body { 
+            font-family: 'Quicksand', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        .glass { background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .option-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); text-align: left; position: relative; overflow: hidden; }
-        .option-btn:hover { background: rgba(99, 102, 241, 0.15); border-color: var(--primary); transform: translateY(-2px); }
-        .math-content { font-size: 1.15rem; line-height: 1.8; word-wrap: break-word; }
-        .mjx-container { outline: none !important; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .option-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-btn:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .correct-anim { background-color: #10b981 !important; color: white !important; border-color: #059669 !important; }
+        .wrong-anim { background-color: #ef4444 !important; color: white !important; border-color: #dc2626 !important; }
+        
+        /* Progress bar animation */
+        .progress-fill { transition: width 0.5s ease-in-out; }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex items-center justify-center p-4">
 
-    <div id="main-container" class="glass w-full max-w-2xl rounded-[2rem] shadow-2xl overflow-hidden animate__animated animate__fadeIn">
+    <div id="app" class="glass-card w-full max-w-xl rounded-3xl shadow-2xl p-6 md:p-10 overflow-hidden">
         
-        <!-- START SCREEN -->
-        <div id="screen-start" class="p-8 md:p-12 space-y-8">
-            <div class="text-center space-y-2">
-                <div class="inline-block p-3 bg-indigo-500/20 rounded-2xl mb-2 text-indigo-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        <!-- Màn hình bắt đầu -->
+        <div id="setup-screen" class="space-y-8">
+            <div class="text-center">
+                <div class="inline-block p-4 bg-blue-100 rounded-2xl mb-4 text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-black bg-gradient-to-br from-white to-indigo-300 bg-clip-text text-transparent">TOÁN 11 AI PRO</h1>
-                <p class="text-slate-400 font-medium">Luyện tập thông minh với trí tuệ nhân tạo</p>
+                <h1 class="text-3xl font-extrabold text-gray-800">Toán 11 Mastery</h1>
+                <p class="text-gray-500 mt-2 text-lg">Hệ thống trắc nghiệm thông minh</p>
             </div>
-
+            
             <div class="space-y-4">
-                <div class="relative">
-                    <input type="text" id="user-name" placeholder="Nhập tên của bạn..." class="w-full p-4 bg-slate-900/50 border border-slate-700 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-center font-bold">
+                <label class="block text-sm font-bold text-gray-700">Tên của bạn</label>
+                <input type="text" id="username" placeholder="Nhập tên..." 
+                    class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-blue-500 focus:bg-white outline-none transition-all">
+            </div>
+            
+            <div class="space-y-4">
+                <label class="block text-sm font-bold text-gray-700 text-center">Chọn trình độ</label>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <button onclick="startQuiz('easy')" class="p-4 bg-emerald-50 text-emerald-600 font-bold rounded-2xl border-2 border-emerald-100 hover:bg-emerald-500 hover:text-white transition-all">DỄ</button>
+                    <button onclick="startQuiz('medium')" class="p-4 bg-amber-50 text-amber-600 font-bold rounded-2xl border-2 border-amber-100 hover:bg-amber-500 hover:text-white transition-all">TRUNG BÌNH</button>
+                    <button onclick="startQuiz('hard')" class="p-4 bg-rose-50 text-rose-600 font-bold rounded-2xl border-2 border-rose-100 hover:bg-rose-500 hover:text-white transition-all">KHÓ</button>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-500 ml-2 uppercase">Số lượng</label>
-                        <select id="num-questions" class="w-full p-4 bg-slate-900/50 border border-slate-700 rounded-2xl font-bold appearance-none cursor-pointer hover:bg-slate-800 transition-colors">
-                            <option value="5">5 Câu</option>
-                            <option value="10">10 Câu</option>
-                            <option value="20">20 Câu</option>
-                        </select>
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-500 ml-2 uppercase">Mức độ</label>
-                        <select id="level-select" class="w-full p-4 bg-slate-900/50 border border-slate-700 rounded-2xl font-bold text-indigo-400 appearance-none cursor-pointer hover:bg-slate-800 transition-colors">
-                            <option value="dễ">Cơ bản</option>
-                            <option value="trung bình">Thông hiểu</option>
-                            <option value="khó">Vận dụng</option>
-                        </select>
-                    </div>
-                </div>
-
-                <button id="btn-start" onclick="prepareQuiz()" class="w-full py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl shadow-lg shadow-indigo-500/30 transition-all uppercase tracking-widest active:scale-[0.98]">Bắt đầu làm bài</button>
             </div>
 
-            <div id="leaderboard" class="pt-6 border-t border-slate-700/50">
-                <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 text-center">Bảng xếp hạng hệ thống</p>
-                <div id="lb-content" class="space-y-3">
-                    <div class="flex justify-center py-4"><div class="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div></div>
+            <!-- BXH -->
+            <div class="pt-6 border-t border-gray-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                        <span>🏆 Bảng vàng</span>
+                    </h3>
+                    <button onclick="loadLeaderboard()" class="text-blue-500 text-sm hover:underline">Làm mới</button>
+                </div>
+                <div id="leaderboard-list" class="space-y-2 max-h-40 overflow-y-auto">
+                    <!-- Data -->
                 </div>
             </div>
         </div>
 
-        <!-- LOADING SCREEN -->
-        <div id="screen-loading" class="hidden p-20 text-center space-y-6">
-            <div class="relative inline-block">
-                <div class="w-20 h-20 border-4 border-indigo-500/20 rounded-full animate-ping"></div>
-                <div class="absolute inset-0 w-20 h-20 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-            <div class="space-y-2">
-                <h2 class="text-xl font-black">AI ĐANG SOẠN ĐỀ...</h2>
-                <p class="text-slate-400 text-sm italic">"Đang tối ưu hóa các công thức LaTeX..."</p>
-            </div>
-        </div>
-
-        <!-- QUIZ SCREEN -->
-        <div id="screen-quiz" class="hidden p-6 md:p-10 space-y-6">
+        <!-- Màn hình làm bài -->
+        <div id="quiz-screen" class="hidden space-y-6">
             <div class="flex justify-between items-center">
-                <div class="px-4 py-1.5 bg-slate-800 rounded-full text-xs font-bold text-slate-400" id="current-index">Câu 1/10</div>
-                <div id="timer" class="font-mono text-xl text-indigo-400 font-black">00:00</div>
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold" id="user-initial">A</div>
+                    <div>
+                        <p class="text-sm font-bold text-gray-800" id="display-name">---</p>
+                        <p class="text-xs text-gray-400" id="display-mode">Mode</p>
+                    </div>
+                </div>
+                <div class="bg-red-50 px-4 py-2 rounded-full">
+                    <span id="timer" class="text-red-600 font-mono font-bold text-lg">00:00</span>
+                </div>
             </div>
 
-            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                <div id="progress-bar" class="h-full bg-indigo-500 transition-all duration-500" style="width: 0%"></div>
-            </div>
-            
-            <div class="bg-slate-900/30 p-8 rounded-3xl border border-slate-700/50 min-h-[160px] flex items-center justify-center">
-                <div id="question-text" class="math-content text-lg md:text-xl font-bold text-center leading-relaxed"></div>
-            </div>
-
-            <div id="options-container" class="grid gap-3"></div>
-        </div>
-
-        <!-- RESULT SCREEN -->
-        <div id="screen-result" class="hidden p-12 text-center space-y-8 animate__animated animate__zoomIn">
+            <!-- Progress Bar -->
             <div class="space-y-2">
-                <p class="text-slate-400 font-bold uppercase tracking-widest">Kết quả của bạn</p>
-                <h2 class="text-7xl font-black text-indigo-500" id="final-score">0</h2>
+                <div class="flex justify-between text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    <span id="progress-text">Câu hỏi 1/5</span>
+                    <span id="percentage-text">0%</span>
+                </div>
+                <div class="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="progress-fill bg-blue-600 h-full w-0"></div>
+                </div>
             </div>
             
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-slate-800/50 p-4 rounded-2xl">
-                    <p class="text-[10px] text-slate-500 font-bold uppercase">Thời gian</p>
-                    <p class="text-xl font-bold" id="res-time">0s</p>
+            <div class="py-4">
+                <h2 id="question-text" class="text-xl md:text-2xl font-bold text-gray-800 leading-snug min-h-[80px]"></h2>
+            </div>
+
+            <div id="options-container" class="grid gap-4">
+                <!-- Nút đáp án -->
+            </div>
+        </div>
+
+        <!-- Màn hình kết quả -->
+        <div id="result-screen" class="hidden text-center space-y-8 animate-in fade-in duration-500">
+            <div class="relative inline-block">
+                <div class="text-7xl mb-2">🏅</div>
+                <div class="absolute -top-2 -right-2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">NEW!</div>
+            </div>
+            <div>
+                <h2 class="text-3xl font-black text-gray-800">Tuyệt vời!</h2>
+                <p class="text-gray-500 mt-1">Bạn đã hoàn thành bài thi</p>
+            </div>
+            
+            <div class="flex justify-center gap-8 py-4">
+                <div class="text-center">
+                    <p class="text-xs font-bold text-gray-400 uppercase">Đúng</p>
+                    <p id="final-score" class="text-4xl font-black text-blue-600">0/5</p>
                 </div>
-                <div class="bg-slate-800/50 p-4 rounded-2xl">
-                    <p class="text-[10px] text-slate-500 font-bold uppercase">Xếp hạng</p>
-                    <p class="text-xl font-bold" id="res-rank">#--</p>
+                <div class="text-center border-l border-gray-100 pl-8">
+                    <p class="text-xs font-bold text-gray-400 uppercase">Thời gian</p>
+                    <p id="final-time" class="text-4xl font-black text-gray-700">0s</p>
                 </div>
             </div>
 
-            <button onclick="location.reload()" class="w-full py-5 bg-indigo-600 rounded-2xl font-black uppercase shadow-xl hover:bg-indigo-500 transition-all">Quay lại trang chủ</button>
+            <div id="result-feedback" class="p-4 bg-blue-50 rounded-2xl text-blue-700 text-sm italic">
+                "Kiến thức là sức mạnh, hãy tiếp tục cố gắng nhé!"
+            </div>
+
+            <button onclick="resetApp()" class="w-full p-5 bg-gray-800 text-white font-bold rounded-2xl hover:bg-black transition-all shadow-xl active:scale-95">
+                VỀ TRANG CHỦ
+            </button>
         </div>
+
     </div>
 
     <script>
-        // Cấu hình môi trường
-        const API_KEY_GEMINI = "AIzaSyC-HhJtXxvmCCGUpK8WG9LWJnk8hkEiTRg"; 
-        const appId = "toan11-ai-v2";
-        const firebaseConfig = {
-            apiKey: "AIzaSyD63KfkRDa4g-UTDRqmDsfgYbZtfdg0CRE",
-            authDomain: "deckkoquiz.firebaseapp.com",
-            projectId: "deckkoquiz",
-            storageBucket: "deckkoquiz.firebasestorage.app",
-            messagingSenderId: "354847466186",
-            appId: "1:354847466186:web:52aa72316d22ef51f84a33"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        // --- CẤU HÌNH ---
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const auth = firebase.auth();
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'toan11-mastery-pro';
 
-        let state = {
-            questions: [],
-            current: 0,
-            score: 0,
-            timer: 0,
-            interval: null,
-            name: "",
-            total: 5,
-            level: "dễ"
+        const questionsDB = {
+            easy: [
+                { q: "Tập xác định của hàm số $y = \\tan x$ là?", a: ["$D = \\mathbb{R} \\setminus \\{\\frac{\\pi}{2} + k\\pi\\}$", "$D = \\mathbb{R} \\setminus \\{k\\pi\\}$", "$D = \\mathbb{R}$", "$D = [-1; 1]$"], c: 0 },
+                { q: "Giá trị lớn nhất của $y = 2\\sin x + 1$ là?", a: ["3", "1", "2", "-1"], c: 0 },
+                { q: "Dãy số $1, 3, 5, 7, ...$ là cấp số cộng có công sai $d$ bằng?", a: ["2", "1", "3", "-2"], c: 0 },
+                { q: "Trong không gian, 3 điểm không thẳng hàng xác định bao nhiêu mặt phẳng?", a: ["1 mặt phẳng duy nhất", "Vô số", "2 mặt phẳng", "0"], c: 0 },
+                { q: "$\\lim_{n \\to \\infty} \\frac{1}{n}$ bằng?", a: ["0", "1", "+\\infty", "Không tồn tại"], c: 0 }
+            ],
+            medium: [
+                { q: "Chu kỳ tuần hoàn của hàm số $y = \\cos 2x$ là?", a: ["$\\pi$", "$2\\pi$", "$\\pi/2$", "$4\\pi$"], c: 0 },
+                { q: "Cho cấp số nhân có $u_1 = 3, q = 2$. Tính $u_3$?", a: ["12", "6", "9", "18"], c: 0 },
+                { q: "Tính giới hạn $L = \\lim \\frac{2n+1}{n+3}$.", a: ["2", "1/3", "0", "+\\infty"], c: 0 },
+                { q: "Phương trình $\\sin x = 0$ có nghiệm là?", a: ["$x = k\\pi$", "$x = \\pi/2 + k\\pi$", "$x = k2\\pi$", "$x = \\pi + k2\\pi$"], c: 0 },
+                { q: "Hình chóp tứ giác có tổng cộng bao nhiêu cạnh?", a: ["8", "4", "5", "10"], c: 0 }
+            ],
+            hard: [
+                { q: "Tính tổng $S = 1 + 1/2 + 1/4 + ... + 1/2^n + ...$?", a: ["2", "1", "1.5", "+\\infty$"], c: 0 },
+                { q: "Đường thẳng $a$ song song mặt phẳng $(P)$ khi?", a: ["$a$ song song với 1 đường thẳng trong $(P)$", "$a$ cắt $(P)$", "$a$ nằm trong $(P)$", "$a$ vuông góc $(P)$"], c: 0 },
+                { q: "Giá trị nhỏ nhất của $y = \\sin^4 x + \\cos^4 x$ là?", a: ["1/2", "0", "1", "3/4"], c: 0 },
+                { q: "Số nghiệm của phương trình $\\cos x = 1/2$ trên $[0; 2\\pi]$ là?", a: ["2", "1", "3", "4"], c: 0 },
+                { q: "Giới hạn $\\lim_{x \\to 0} \\frac{\\sin x}{x}$ bằng?", a: ["1", "0", "Vô cực", "Không tồn tại"], c: 0 }
+            ]
         };
 
-        // Đăng nhập vô danh ngay khi load để sẵn sàng cho Firestore
-        auth.signInAnonymously().catch(e => console.error("Auth error:", e));
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let playerName = "";
+        let timerInterval;
+        let seconds = 0;
+        let isLocked = false;
 
-        async function fetchAIQuestions(level, count) {
-            const prompt = `Bạn là chuyên gia soạn đề Toán lớp 11. Hãy soạn bộ đề trắc nghiệm mức độ ${level} gồm ${count} câu.
-            YÊU CẦU QUAN TRỌNG:
-            1. Tất cả công thức toán học PHẢI được bọc trong ký hiệu $ (ví dụ: $y = \sin x + 1$).
-            2. Trả về JSON theo cấu trúc: [{"q": "Câu hỏi...", "a": ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"], "c": index_đáp_án_đúng_0_đến_3}].
-            3. Chỉ trả về JSON, không thêm văn bản khác. Tránh các ký tự xuống dòng trong chuỗi JSON.`;
-
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY_GEMINI}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-                
-                const data = await response.json();
-                let rawText = data.candidates[0].content.parts[0].text;
-                // Clean markdown code blocks
-                rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-                return JSON.parse(rawText);
-            } catch (error) {
-                console.error("AI Error:", error);
-                // Fallback nếu AI lỗi
-                return Array(count).fill({
-                    q: "Tính giá trị của biểu thức $\\sin^2(x) + \\cos^2(x)$?",
-                    a: ["0", "1", "-1", "$\\frac{1}{2}$"],
-                    c: 1
+        function renderMath() {
+            if (window.renderMathInElement) {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ]
                 });
             }
         }
 
-        async function prepareQuiz() {
-            state.name = document.getElementById('user-name').value.trim();
-            if (!state.name) {
-                alert("Vui lòng nhập tên để lưu kết quả!");
+        async function startQuiz(mode) {
+            playerName = document.getElementById('username').value.trim();
+            if (!playerName) {
+                alert("Bạn chưa nhập tên kìa! 😊");
                 return;
             }
 
-            state.total = parseInt(document.getElementById('num-questions').value);
-            state.level = document.getElementById('level-select').value;
+            currentQuestions = [...questionsDB[mode]].sort(() => Math.random() - 0.5);
+            currentIndex = 0;
+            score = 0;
+            seconds = 0;
+            isLocked = false;
 
-            document.getElementById('screen-start').classList.add('hidden');
-            document.getElementById('screen-loading').classList.remove('hidden');
+            document.getElementById('display-name').innerText = playerName;
+            document.getElementById('display-mode').innerText = "Trình độ: " + mode.toUpperCase();
+            document.getElementById('user-initial').innerText = playerName[0].toUpperCase();
 
-            state.questions = await fetchAIQuestions(state.level, state.total);
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
             
-            document.getElementById('screen-loading').classList.add('hidden');
-            document.getElementById('screen-quiz').classList.remove('hidden');
-            startQuizLoop();
+            startTimer();
+            showQuestion();
         }
 
-        function startQuizLoop() {
-            renderQuestion();
-            state.interval = setInterval(() => {
-                state.timer++;
-                let m = Math.floor(state.timer / 60).toString().padStart(2, '0');
-                let s = (state.timer % 60).toString().padStart(2, '0');
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                seconds++;
+                let m = Math.floor(seconds / 60).toString().padStart(2, '0');
+                let s = (seconds % 60).toString().padStart(2, '0');
                 document.getElementById('timer').innerText = `${m}:${s}`;
             }, 1000);
         }
 
-        function renderQuestion() {
-            const qData = state.questions[state.current];
-            document.getElementById('current-index').innerText = `Câu ${state.current + 1}/${state.total}`;
-            document.getElementById('progress-bar').style.width = `${((state.current + 1) / state.total) * 100}%`;
-            
-            const qEl = document.getElementById('question-text');
-            qEl.innerHTML = qData.q;
+        function showQuestion() {
+            isLocked = false;
+            const q = currentQuestions[currentIndex];
+            const total = currentQuestions.length;
+            const progress = ((currentIndex + 1) / total) * 100;
 
-            const container = document.getElementById('options-container');
-            container.innerHTML = "";
+            document.getElementById('progress-text').innerText = `Câu hỏi ${currentIndex + 1}/${total}`;
+            document.getElementById('percentage-text').innerText = `${Math.round(progress)}%`;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
             
-            qData.a.forEach((opt, i) => {
+            document.getElementById('question-text').innerHTML = q.q;
+            
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            q.a.forEach((opt, i) => {
                 const btn = document.createElement('button');
-                btn.className = "option-btn w-full p-4 glass border border-slate-700 rounded-2xl font-bold flex items-start animate__animated animate__fadeInUp";
-                btn.style.animationDelay = `${i * 0.1}s`;
-                btn.innerHTML = `
-                    <span class="w-8 h-8 flex-shrink-0 bg-slate-800 rounded-lg flex items-center justify-center text-xs text-indigo-400 mr-4 border border-slate-700 font-black">${String.fromCharCode(65+i)}</span>
-                    <span class="flex-grow pt-0.5">${opt}</span>
-                `;
-                btn.onclick = () => handleAnswer(i);
+                btn.className = "option-btn p-4 text-left border-2 border-gray-100 rounded-2xl bg-white font-medium hover:bg-blue-50 hover:border-blue-200 transition-all text-gray-700";
+                btn.innerHTML = opt;
+                btn.onclick = () => checkAnswer(i, btn);
                 container.appendChild(btn);
             });
-
-            // Quan trọng: Gọi MathJax để render lại toán học sau khi DOM thay đổi
-            if (window.MathJax && window.MathJax.typesetPromise) {
-                window.MathJax.typesetPromise([qEl, container]).catch(err => console.log("MathJax error:", err));
-            }
+            renderMath();
         }
 
-        function handleAnswer(selectedIdx) {
-            const correctIdx = state.questions[state.current].c;
-            if (selectedIdx === correctIdx) {
-                state.score++;
+        function checkAnswer(idx, btn) {
+            if (isLocked) return;
+            isLocked = true;
+
+            const correctIdx = currentQuestions[currentIndex].c;
+            const buttons = document.querySelectorAll('.option-btn');
+
+            if (idx === correctIdx) {
+                score++;
+                btn.classList.add('correct-anim');
+            } else {
+                btn.classList.add('wrong-anim');
+                buttons[correctIdx].classList.add('correct-anim');
             }
 
-            if (state.current < state.total - 1) {
-                state.current++;
-                renderQuestion();
-            } else {
-                finishQuiz();
-            }
+            // Tạm dừng một chút để người dùng xem kết quả
+            setTimeout(() => {
+                if (currentIndex < currentQuestions.length - 1) {
+                    currentIndex++;
+                    showQuestion();
+                } else {
+                    finishQuiz();
+                }
+            }, 1200);
         }
 
         async function finishQuiz() {
-            clearInterval(state.interval);
-            document.getElementById('screen-quiz').classList.add('hidden');
-            document.getElementById('screen-result').classList.remove('hidden');
+            clearInterval(timerInterval);
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = `${score}/${currentQuestions.length}`;
+            document.getElementById('final-time').innerText = `${seconds}s`;
             
-            document.getElementById('final-score').innerText = `${state.score}/${state.total}`;
-            document.getElementById('res-time').innerText = `${state.timer}s`;
+            saveScore();
+        }
 
+        async function saveScore() {
             try {
-                // Đảm bảo user đã login (đã xử lý ở onload)
-                if (auth.currentUser) {
-                    await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').add({
-                        name: state.name,
-                        score: state.score,
-                        total: state.total,
-                        time: state.timer,
-                        level: state.level,
-                        ts: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-            } catch (err) {
-                console.error("Save error:", err);
-            }
+                await firebase.auth().signInAnonymously();
+                await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').add({
+                    name: playerName,
+                    score: score,
+                    time: seconds,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (e) { console.error(e); }
         }
 
         async function loadLeaderboard() {
-            const lbContainer = document.getElementById('lb-content');
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = `<p class="text-xs text-center text-gray-400 py-4 italic">Đang cập nhật danh sách...</p>`;
+            
             try {
-                // Dùng cấu trúc path quy định
-                const snapshot = await db.collection('artifacts').doc(appId)
-                                         .collection('public').doc('data')
-                                         .collection('leaderboard')
-                                         .orderBy('score', 'desc')
-                                         .limit(5)
-                                         .get();
-                
-                if (snapshot.empty) {
-                    lbContainer.innerHTML = `<p class="text-center text-slate-600 py-4 text-sm italic">Chưa có dữ liệu...</p>`;
-                    return;
-                }
+                const snapshot = await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').get();
+                let data = [];
+                snapshot.forEach(doc => data.push(doc.data()));
+                data.sort((a, b) => b.score - a.score || a.time - b.time);
 
-                let html = "";
-                snapshot.forEach((doc, idx) => {
-                    const data = doc.data();
-                    const colors = ["text-yellow-400", "text-slate-300", "text-amber-600"];
-                    const medal = idx < 3 ? `<span class="${colors[idx]}">●</span>` : `<span class="text-slate-700">•</span>`;
-                    html += `
-                        <div class="flex justify-between items-center p-3 bg-slate-800/30 rounded-xl border border-slate-700/50">
-                            <div class="flex items-center space-x-3">
-                                <span class="text-[10px] font-black w-4">${idx + 1}</span>
-                                <span class="font-bold text-sm truncate max-w-[120px]">${data.name}</span>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <span class="text-xs text-slate-500">${data.time}s</span>
-                                <span class="font-black text-indigo-400">${data.score}/${data.total}</span>
-                                ${medal}
-                            </div>
+                list.innerHTML = data.slice(0, 5).map((item, i) => `
+                    <div class="flex justify-between items-center p-3 ${i === 0 ? 'bg-yellow-50 border-yellow-100' : 'bg-gray-50'} rounded-xl border border-transparent shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <span class="w-6 h-6 flex items-center justify-center rounded-full bg-white text-xs font-bold shadow-inner">${i+1}</span>
+                            <span class="font-bold text-gray-700">${item.name}</span>
                         </div>
-                    `;
-                });
-                lbContainer.innerHTML = html;
-            } catch (err) {
-                lbContainer.innerHTML = `<p class="text-center text-red-400/50 py-4 text-[10px]">Lỗi tải dữ liệu</p>`;
-            }
+                        <span class="text-xs font-bold text-blue-600">${item.score}đ | ${item.time}s</span>
+                    </div>
+                `).join('') || `<p class="text-center text-gray-400 py-4 text-xs">Chưa có dữ liệu thi đấu.</p>`;
+            } catch (e) { list.innerHTML = "Không thể tải dữ liệu."; }
         }
 
-        // Khởi chạy khi vào trang
-        window.onload = () => {
+        function resetApp() {
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
             loadLeaderboard();
-        };
+        }
+
+        window.onload = loadLeaderboard;
     </script>
 </body>
 </html>
