@@ -3,244 +3,365 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toán 11 AI - Deckko Quiz</title>
+    <title>Toán 11 AI Pro - Update</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore-compat.js"></script>
-    <!-- Thêm thư viện hiển thị công thức toán học chuyên nghiệp -->
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                enableMenu: false,
+                renderActions: {
+                    addMenu: []
+                }
+            },
+            startup: {
+                typeset: true
+            }
+        };
+    </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
-        body { font-family: 'Quicksand', sans-serif; background: #f0f4f8; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .loading-shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        /* Tùy chỉnh hiển thị MathJax trong nút bấm */
-        .mjx-chtml { white-space: normal !important; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        
+        :root { --primary: #6366f1; --bg: #0f172a; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0px, transparent 50%);
+            color: #f8fafc;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+        .glass { background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .option-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); text-align: left; position: relative; overflow: hidden; }
+        .option-btn:hover { background: rgba(99, 102, 241, 0.15); border-color: var(--primary); transform: translateY(-2px); }
+        .math-content { font-size: 1.15rem; line-height: 1.8; word-wrap: break-word; }
+        .mjx-container { outline: none !important; }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body>
 
-    <div id="app-container" class="glass w-full max-w-xl rounded-[2rem] shadow-2xl p-6 md:p-10 relative overflow-hidden">
+    <div id="main-container" class="glass w-full max-w-2xl rounded-[2rem] shadow-2xl overflow-hidden animate__animated animate__fadeIn">
         
-        <!-- MÀN HÌNH CHÍNH -->
-        <div id="screen-start" class="space-y-8">
-            <div class="text-center">
-                <div class="text-5xl mb-4">📐</div>
-                <h1 class="text-3xl font-black text-indigo-800">TOÁN 11 AI</h1>
-                <p class="text-slate-500 font-medium">Đề thi được soạn ngẫu nhiên bởi Trí tuệ nhân tạo</p>
+        <!-- START SCREEN -->
+        <div id="screen-start" class="p-8 md:p-12 space-y-8">
+            <div class="text-center space-y-2">
+                <div class="inline-block p-3 bg-indigo-500/20 rounded-2xl mb-2 text-indigo-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <h1 class="text-3xl md:text-4xl font-black bg-gradient-to-br from-white to-indigo-300 bg-clip-text text-transparent">TOÁN 11 AI PRO</h1>
+                <p class="text-slate-400 font-medium">Luyện tập thông minh với trí tuệ nhân tạo</p>
             </div>
 
             <div class="space-y-4">
-                <input type="text" id="user-name" placeholder="Nhập tên của bạn..." 
-                    class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl focus:border-indigo-500 outline-none transition-all text-lg font-bold">
+                <div class="relative">
+                    <input type="text" id="user-name" placeholder="Nhập tên của bạn..." class="w-full p-4 bg-slate-900/50 border border-slate-700 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-center font-bold">
+                </div>
                 
-                <div class="grid grid-cols-1 gap-3">
-                    <button onclick="startQuiz('dễ')" class="p-4 bg-emerald-500 text-white font-bold rounded-2xl shadow-lg hover:bg-emerald-600 transition-all active:scale-95">MỨC ĐỘ DỄ</button>
-                    <button onclick="startQuiz('trung bình')" class="p-4 bg-amber-500 text-white font-bold rounded-2xl shadow-lg hover:bg-amber-600 transition-all active:scale-95">MỨC ĐỘ VỪA</button>
-                    <button onclick="startQuiz('khó')" class="p-4 bg-rose-500 text-white font-bold rounded-2xl shadow-lg hover:bg-rose-600 transition-all active:scale-95">MỨC ĐỘ KHÓ</button>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-500 ml-2 uppercase">Số lượng</label>
+                        <select id="num-questions" class="w-full p-4 bg-slate-900/50 border border-slate-700 rounded-2xl font-bold appearance-none cursor-pointer hover:bg-slate-800 transition-colors">
+                            <option value="5">5 Câu</option>
+                            <option value="10">10 Câu</option>
+                            <option value="20">20 Câu</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-500 ml-2 uppercase">Mức độ</label>
+                        <select id="level-select" class="w-full p-4 bg-slate-900/50 border border-slate-700 rounded-2xl font-bold text-indigo-400 appearance-none cursor-pointer hover:bg-slate-800 transition-colors">
+                            <option value="dễ">Cơ bản</option>
+                            <option value="trung bình">Thông hiểu</option>
+                            <option value="khó">Vận dụng</option>
+                        </select>
+                    </div>
                 </div>
+
+                <button id="btn-start" onclick="prepareQuiz()" class="w-full py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl shadow-lg shadow-indigo-500/30 transition-all uppercase tracking-widest active:scale-[0.98]">Bắt đầu làm bài</button>
             </div>
 
-            <div class="pt-6 border-t border-slate-100">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="font-bold text-slate-700">🏆 BẢNG XẾP HẠNG</h2>
-                    <button onclick="loadLeaderboard()" class="text-xs font-bold text-indigo-600">LÀM MỚI</button>
-                </div>
-                <div id="leaderboard" class="space-y-2 max-h-48 overflow-y-auto pr-2">
-                    <div class="loading-shimmer h-12 rounded-xl"></div>
+            <div id="leaderboard" class="pt-6 border-t border-slate-700/50">
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 text-center">Bảng xếp hạng hệ thống</p>
+                <div id="lb-content" class="space-y-3">
+                    <div class="flex justify-center py-4"><div class="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div></div>
                 </div>
             </div>
         </div>
 
-        <!-- MÀN HÌNH CHỜ AI SOẠN ĐỀ -->
-        <div id="screen-loading" class="hidden text-center py-20 space-y-6">
-            <div class="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p class="text-xl font-bold text-slate-700">AI đang soạn đề thi cho bạn...</p>
-            <p class="text-sm text-slate-400 italic">Vui lòng đợi trong giây lát</p>
+        <!-- LOADING SCREEN -->
+        <div id="screen-loading" class="hidden p-20 text-center space-y-6">
+            <div class="relative inline-block">
+                <div class="w-20 h-20 border-4 border-indigo-500/20 rounded-full animate-ping"></div>
+                <div class="absolute inset-0 w-20 h-20 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <div class="space-y-2">
+                <h2 class="text-xl font-black">AI ĐANG SOẠN ĐỀ...</h2>
+                <p class="text-slate-400 text-sm italic">"Đang tối ưu hóa các công thức LaTeX..."</p>
+            </div>
         </div>
 
-        <!-- MÀN HÌNH LÀM BÀI -->
-        <div id="screen-quiz" class="hidden space-y-6">
-            <div class="flex justify-between items-center bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
-                <div id="quiz-info" class="font-bold text-indigo-700"></div>
-                <div id="timer" class="text-2xl font-mono font-bold text-rose-500">00:00</div>
+        <!-- QUIZ SCREEN -->
+        <div id="screen-quiz" class="hidden p-6 md:p-10 space-y-6">
+            <div class="flex justify-between items-center">
+                <div class="px-4 py-1.5 bg-slate-800 rounded-full text-xs font-bold text-slate-400" id="current-index">Câu 1/10</div>
+                <div id="timer" class="font-mono text-xl text-indigo-400 font-black">00:00</div>
             </div>
-            <div id="progress-container" class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div id="progress-bar" class="h-full bg-indigo-500 transition-all duration-300" style="width: 0%"></div>
+
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div id="progress-bar" class="h-full bg-indigo-500 transition-all duration-500" style="width: 0%"></div>
             </div>
-            <h2 id="question-text" class="text-xl font-bold text-slate-800 leading-relaxed min-h-[80px]"></h2>
+            
+            <div class="bg-slate-900/30 p-8 rounded-3xl border border-slate-700/50 min-h-[160px] flex items-center justify-center">
+                <div id="question-text" class="math-content text-lg md:text-xl font-bold text-center leading-relaxed"></div>
+            </div>
+
             <div id="options-container" class="grid gap-3"></div>
         </div>
 
-        <!-- MÀN HÌNH KẾT QUẢ -->
-        <div id="screen-result" class="hidden text-center space-y-8 py-10">
-            <div class="text-7xl">🎉</div>
-            <div class="bg-white p-6 rounded-3xl shadow-inner border border-slate-100">
-                <h2 class="text-2xl font-bold text-slate-700">KẾT QUẢ</h2>
-                <div id="final-score" class="text-6xl font-black text-indigo-600 my-4">0/0</div>
-                <p id="final-time" class="text-slate-400 font-bold"></p>
+        <!-- RESULT SCREEN -->
+        <div id="screen-result" class="hidden p-12 text-center space-y-8 animate__animated animate__zoomIn">
+            <div class="space-y-2">
+                <p class="text-slate-400 font-bold uppercase tracking-widest">Kết quả của bạn</p>
+                <h2 class="text-7xl font-black text-indigo-500" id="final-score">0</h2>
             </div>
-            <button onclick="location.reload()" class="w-full p-5 bg-indigo-600 text-white font-bold rounded-2xl shadow-xl hover:bg-indigo-700 transition-colors">CHƠI LẠI ĐỀ MỚI</button>
-        </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-800/50 p-4 rounded-2xl">
+                    <p class="text-[10px] text-slate-500 font-bold uppercase">Thời gian</p>
+                    <p class="text-xl font-bold" id="res-time">0s</p>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-2xl">
+                    <p class="text-[10px] text-slate-500 font-bold uppercase">Xếp hạng</p>
+                    <p class="text-xl font-bold" id="res-rank">#--</p>
+                </div>
+            </div>
 
+            <button onclick="location.reload()" class="w-full py-5 bg-indigo-600 rounded-2xl font-black uppercase shadow-xl hover:bg-indigo-500 transition-all">Quay lại trang chủ</button>
+        </div>
     </div>
 
     <script>
-        // --- CẤU HÌNH FIREBASE ---
+        // Cấu hình môi trường
+        const API_KEY_GEMINI = "AIzaSyC-HhJtXxvmCCGUpK8WG9LWJnk8hkEiTRg"; 
+        const appId = "toan11-ai-v2";
         const firebaseConfig = {
             apiKey: "AIzaSyD63KfkRDa4g-UTDRqmDsfgYbZtfdg0CRE",
             authDomain: "deckkoquiz.firebaseapp.com",
             projectId: "deckkoquiz",
             storageBucket: "deckkoquiz.firebasestorage.app",
             messagingSenderId: "354847466186",
-            appId: "1:354847466186:web:52aa72316d22ef51f84a33",
-            measurementId: "G-H6B281TFFP"
+            appId: "1:354847466186:web:52aa72316d22ef51f84a33"
         };
-        const GEMINI_KEY = "AIzaSyC-HhJtXxvmCCGUpK8WG9LWJnk8hkEiTRg";
 
-        // Khởi tạo Firebase (Cần tạo Firestore Database trên Console)
-        const app = firebase.initializeApp(firebaseConfig);
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const quizId = "deckko-toan-11-v2";
+        const auth = firebase.auth();
 
-        let questions = [];
-        let currentIndex = 0;
-        let score = 0;
-        let timer = 0;
-        let timerId;
-        let playerName = "";
+        let state = {
+            questions: [],
+            current: 0,
+            score: 0,
+            timer: 0,
+            interval: null,
+            name: "",
+            total: 5,
+            level: "dễ"
+        };
 
-        // Hàm gọi AI lấy đề thi ngẫu nhiên (Hỗ trợ LaTeX cho MathJax)
-        async function fetchAIQuestions(level) {
-            const prompt = `Hãy soạn 5 câu hỏi trắc nghiệm Toán lớp 11, chương trình Học kỳ 1 (Hàm số lượng giác, Cấp số cộng/nhân, Giới hạn...), mức độ ${level}. 
-            Yêu cầu: Sử dụng ký hiệu LaTeX (ví dụ: $\\pi$, $\\frac{a}{b}$) cho các công thức.
-            Trả về JSON mảng đối tượng: [{"q":"Câu hỏi","a":["A","B","C","D"],"c":index_đúng_từ_0_đến_3}]. Chỉ trả về JSON, không thêm chữ khác.`;
+        // Đăng nhập vô danh ngay khi load để sẵn sàng cho Firestore
+        auth.signInAnonymously().catch(e => console.error("Auth error:", e));
+
+        async function fetchAIQuestions(level, count) {
+            const prompt = `Bạn là chuyên gia soạn đề Toán lớp 11. Hãy soạn bộ đề trắc nghiệm mức độ ${level} gồm ${count} câu.
+            YÊU CẦU QUAN TRỌNG:
+            1. Tất cả công thức toán học PHẢI được bọc trong ký hiệu $ (ví dụ: $y = \sin x + 1$).
+            2. Trả về JSON theo cấu trúc: [{"q": "Câu hỏi...", "a": ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"], "c": index_đáp_án_đúng_0_đến_3}].
+            3. Chỉ trả về JSON, không thêm văn bản khác. Tránh các ký tự xuống dòng trong chuỗi JSON.`;
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_KEY}`, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY_GEMINI}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
+                
                 const data = await response.json();
-                let text = data.candidates[0].content.parts[0].text;
-                text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-                return JSON.parse(text);
+                let rawText = data.candidates[0].content.parts[0].text;
+                // Clean markdown code blocks
+                rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+                return JSON.parse(rawText);
             } catch (error) {
                 console.error("AI Error:", error);
-                // Đề thi dự phòng
-                return [{q:"Hàm số $y = \\sin x$ tuần hoàn với chu kỳ?", a:["$\\pi$", "$2\\pi$", "$\\frac{\\pi}{2}$", "$3\\pi$"], c:1}];
+                // Fallback nếu AI lỗi
+                return Array(count).fill({
+                    q: "Tính giá trị của biểu thức $\\sin^2(x) + \\cos^2(x)$?",
+                    a: ["0", "1", "-1", "$\\frac{1}{2}$"],
+                    c: 1
+                });
             }
         }
 
-        async function startQuiz(level) {
-            playerName = document.getElementById('user-name').value.trim();
-            if (!playerName) return alert("Vui lòng nhập tên của bạn!");
+        async function prepareQuiz() {
+            state.name = document.getElementById('user-name').value.trim();
+            if (!state.name) {
+                alert("Vui lòng nhập tên để lưu kết quả!");
+                return;
+            }
+
+            state.total = parseInt(document.getElementById('num-questions').value);
+            state.level = document.getElementById('level-select').value;
 
             document.getElementById('screen-start').classList.add('hidden');
             document.getElementById('screen-loading').classList.remove('hidden');
 
-            questions = await fetchAIQuestions(level);
-
+            state.questions = await fetchAIQuestions(state.level, state.total);
+            
             document.getElementById('screen-loading').classList.add('hidden');
             document.getElementById('screen-quiz').classList.remove('hidden');
-            document.getElementById('quiz-info').innerText = `${playerName} | ${level.toUpperCase()}`;
-
-            startTimer();
-            renderQuestion();
+            startQuizLoop();
         }
 
-        function startTimer() {
-            timer = 0;
-            timerId = setInterval(() => {
-                timer++;
-                let m = Math.floor(timer / 60).toString().padStart(2, '0');
-                let s = (timer % 60).toString().padStart(2, '0');
+        function startQuizLoop() {
+            renderQuestion();
+            state.interval = setInterval(() => {
+                state.timer++;
+                let m = Math.floor(state.timer / 60).toString().padStart(2, '0');
+                let s = (state.timer % 60).toString().padStart(2, '0');
                 document.getElementById('timer').innerText = `${m}:${s}`;
             }, 1000);
         }
 
         function renderQuestion() {
-            const q = questions[currentIndex];
-            const qText = document.getElementById('question-text');
-            qText.innerText = q.q;
+            const qData = state.questions[state.current];
+            document.getElementById('current-index').innerText = `Câu ${state.current + 1}/${state.total}`;
+            document.getElementById('progress-bar').style.width = `${((state.current + 1) / state.total) * 100}%`;
             
-            document.getElementById('progress-bar').style.width = `${((currentIndex) / questions.length) * 100}%`;
+            const qEl = document.getElementById('question-text');
+            qEl.innerHTML = qData.q;
 
             const container = document.getElementById('options-container');
             container.innerHTML = "";
-
-            q.a.forEach((opt, i) => {
+            
+            qData.a.forEach((opt, i) => {
                 const btn = document.createElement('button');
-                btn.className = "p-4 text-left border-2 border-slate-100 rounded-2xl bg-white hover:border-indigo-400 hover:bg-indigo-50 transition-all font-bold text-slate-700 shadow-sm outline-none";
-                btn.innerText = opt;
-                btn.onclick = () => {
-                    if (i === q.c) score++;
-                    if (currentIndex < questions.length - 1) {
-                        currentIndex++;
-                        renderQuestion();
-                    } else {
-                        endQuiz();
-                    }
-                };
+                btn.className = "option-btn w-full p-4 glass border border-slate-700 rounded-2xl font-bold flex items-start animate__animated animate__fadeInUp";
+                btn.style.animationDelay = `${i * 0.1}s`;
+                btn.innerHTML = `
+                    <span class="w-8 h-8 flex-shrink-0 bg-slate-800 rounded-lg flex items-center justify-center text-xs text-indigo-400 mr-4 border border-slate-700 font-black">${String.fromCharCode(65+i)}</span>
+                    <span class="flex-grow pt-0.5">${opt}</span>
+                `;
+                btn.onclick = () => handleAnswer(i);
                 container.appendChild(btn);
             });
 
-            // Yêu cầu MathJax quét lại nội dung mới để hiển thị công thức
-            if (window.MathJax) {
-                MathJax.typesetPromise();
+            // Quan trọng: Gọi MathJax để render lại toán học sau khi DOM thay đổi
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([qEl, container]).catch(err => console.log("MathJax error:", err));
             }
         }
 
-        async function endQuiz() {
-            clearInterval(timerId);
+        function handleAnswer(selectedIdx) {
+            const correctIdx = state.questions[state.current].c;
+            if (selectedIdx === correctIdx) {
+                state.score++;
+            }
+
+            if (state.current < state.total - 1) {
+                state.current++;
+                renderQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        async function finishQuiz() {
+            clearInterval(state.interval);
             document.getElementById('screen-quiz').classList.add('hidden');
             document.getElementById('screen-result').classList.remove('hidden');
-            document.getElementById('final-score').innerText = `${score}/${questions.length}`;
-            document.getElementById('final-time').innerText = `Hoàn thành trong ${timer} giây`;
+            
+            document.getElementById('final-score').innerText = `${state.score}/${state.total}`;
+            document.getElementById('res-time').innerText = `${state.timer}s`;
 
             try {
-                // Tự động đăng nhập ẩn danh để ghi điểm vào Firestore
-                await firebase.auth().signInAnonymously();
-                await db.collection('artifacts').doc(quizId).collection('public').doc('data').collection('leaderboard').add({
-                    name: playerName,
-                    score: score,
-                    time: timer,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                loadLeaderboard();
-            } catch (e) { console.error("Lưu điểm lỗi:", e); }
+                // Đảm bảo user đã login (đã xử lý ở onload)
+                if (auth.currentUser) {
+                    await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').add({
+                        name: state.name,
+                        score: state.score,
+                        total: state.total,
+                        time: state.timer,
+                        level: state.level,
+                        ts: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            } catch (err) {
+                console.error("Save error:", err);
+            }
         }
 
         async function loadLeaderboard() {
-            const lb = document.getElementById('leaderboard');
+            const lbContainer = document.getElementById('lb-content');
             try {
-                const snap = await db.collection('artifacts').doc(quizId).collection('public').doc('data').collection('leaderboard')
-                                    .orderBy('score', 'desc')
-                                    .limit(10)
-                                    .get();
-                let list = [];
-                snap.forEach(doc => list.push(doc.data()));
+                // Dùng cấu trúc path quy định
+                const snapshot = await db.collection('artifacts').doc(appId)
+                                         .collection('public').doc('data')
+                                         .collection('leaderboard')
+                                         .orderBy('score', 'desc')
+                                         .limit(5)
+                                         .get();
                 
-                // Firestore đôi khi cần index cho orderBy phức tạp, nếu lỗi ta sẽ sort thủ công ở đây
-                list.sort((a,b) => b.score - a.score || a.time - b.time);
+                if (snapshot.empty) {
+                    lbContainer.innerHTML = `<p class="text-center text-slate-600 py-4 text-sm italic">Chưa có dữ liệu...</p>`;
+                    return;
+                }
 
-                lb.innerHTML = list.slice(0, 10).map((u, i) => `
-                    <div class="flex justify-between items-center p-4 bg-white rounded-2xl shadow-sm border border-slate-50">
-                        <span class="font-bold text-slate-700">#${i+1} ${u.name}</span>
-                        <span class="text-indigo-600 font-black">${u.score}đ - ${u.time}s</span>
-                    </div>
-                `).join('') || "<p class='text-center text-slate-400 py-4'>Chưa có dữ liệu.</p>";
-            } catch (e) { 
-                console.error("Leaderboard Error:", e);
-                lb.innerHTML = "<p class='text-center text-rose-400 py-4'>Đang chờ dữ liệu mới...</p>"; 
+                let html = "";
+                snapshot.forEach((doc, idx) => {
+                    const data = doc.data();
+                    const colors = ["text-yellow-400", "text-slate-300", "text-amber-600"];
+                    const medal = idx < 3 ? `<span class="${colors[idx]}">●</span>` : `<span class="text-slate-700">•</span>`;
+                    html += `
+                        <div class="flex justify-between items-center p-3 bg-slate-800/30 rounded-xl border border-slate-700/50">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-[10px] font-black w-4">${idx + 1}</span>
+                                <span class="font-bold text-sm truncate max-w-[120px]">${data.name}</span>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xs text-slate-500">${data.time}s</span>
+                                <span class="font-black text-indigo-400">${data.score}/${data.total}</span>
+                                ${medal}
+                            </div>
+                        </div>
+                    `;
+                });
+                lbContainer.innerHTML = html;
+            } catch (err) {
+                lbContainer.innerHTML = `<p class="text-center text-red-400/50 py-4 text-[10px]">Lỗi tải dữ liệu</p>`;
             }
         }
 
-        window.onload = loadLeaderboard;
+        // Khởi chạy khi vào trang
+        window.onload = () => {
+            loadLeaderboard();
+        };
     </script>
 </body>
 </html>
