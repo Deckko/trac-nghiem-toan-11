@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toán 11 - AI Quiz & Leaderboard</title>
+    <title>Toán 11 - Premium AI Quiz</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Firebase SDK (Compat) -->
@@ -17,331 +17,354 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f1f5f9; }
-        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .option-btn { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.2s ease; }
-        .option-btn:hover:not(:disabled) { background: rgba(56, 189, 248, 0.1); border-color: #38bdf8; transform: translateY(-2px); }
-        .option-btn.correct { background: rgba(16, 185, 129, 0.2) !important; border-color: #10b981 !important; color: #34d399; }
-        .option-btn.wrong { background: rgba(239, 68, 68, 0.2) !important; border-color: #ef4444 !important; color: #f87171; }
-        .shimmer { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); background-size: 200% 100%; animation: shimmer 2s infinite; }
-        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        :root {
+            --bg: #0f172a;
+            --primary: #38bdf8;
+            --accent: #818cf8;
+            --glass: rgba(30, 41, 59, 0.75);
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: #f1f5f9;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .premium-card {
+            background: var(--glass);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 600px;
+            border-radius: 2rem;
+            padding: 2.5rem;
+        }
+
+        .input-glow {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .input-glow:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+            outline: none;
+        }
+
+        .btn-action {
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+            color: #0f172a;
+            font-weight: 800;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-action:hover:not(:disabled) {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 12px 24px -6px rgba(56, 189, 248, 0.5);
+        }
+
+        .option-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(4px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .loader {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #1e293b;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+            transition: width 0.4s ease;
+        }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body>
 
-    <div id="app-container" class="w-full max-w-xl">
+    <div id="app-container">
         <!-- Setup Screen -->
-        <div id="setup-screen" class="glass-panel rounded-3xl p-8 space-y-6 shadow-2xl">
+        <div id="setup-screen" class="premium-card space-y-8">
             <div class="text-center space-y-2">
-                <h1 class="text-3xl font-extrabold text-white">Toán 11 <span class="text-sky-400">AI Quiz</span></h1>
-                <p class="text-slate-400 text-sm">Đề thi tạo bởi AI & Lưu điểm Cloud</p>
+                <div class="inline-block px-3 py-1 bg-sky-500/10 text-sky-400 text-[10px] font-bold uppercase tracking-widest rounded-full border border-sky-500/20">AI Education System</div>
+                <h1 class="text-4xl font-black text-white">Toán 11 <span class="text-sky-400">Mastery</span></h1>
+                <p class="text-slate-400 text-sm">Học tập thông minh hơn với đề bài được cá nhân hóa.</p>
             </div>
 
-            <div class="space-y-4">
+            <div class="space-y-5">
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Tên học sinh</label>
-                    <input type="text" id="username" placeholder="Nhập tên để lưu BXH..." class="w-full bg-slate-800/50 border border-slate-700 p-4 rounded-xl outline-none focus:border-sky-500 text-white">
+                    <label class="text-[11px] font-bold text-slate-500 uppercase ml-2 mb-2 block">Tên của bạn</label>
+                    <input type="text" id="username" placeholder="Ví dụ: Minh Anh" class="w-full input-glow p-4 rounded-2xl text-white">
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Số lượng câu</label>
-                        <select id="quiz-limit" class="w-full bg-slate-800/50 border border-slate-700 p-4 rounded-xl outline-none text-white appearance-none cursor-pointer">
-                            <option value="5">5 câu</option>
-                            <option value="10" selected>10 câu</option>
-                            <option value="15">15 câu</option>
+                        <label class="text-[11px] font-bold text-slate-500 uppercase ml-2 mb-2 block">Chủ đề</label>
+                        <select id="quiz-topic" class="w-full input-glow p-4 rounded-2xl text-white appearance-none cursor-pointer">
+                            <option value="Hàm số lượng giác">Hàm số lượng giác</option>
+                            <option value="Dãy số, Cấp số cộng/nhân">Dãy số & Cấp số</option>
+                            <option value="Giới hạn & Hàm số liên tục">Giới hạn & Liên tục</option>
+                            <option value="Hình học không gian">Hình học không gian</option>
+                            <option value="Toàn bộ chương trình">Tổng hợp kiến thức</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Độ khó</label>
-                        <select id="quiz-level" class="w-full bg-slate-800/50 border border-slate-700 p-4 rounded-xl outline-none text-white appearance-none cursor-pointer">
-                            <option value="cơ bản">Cơ bản</option>
-                            <option value="khá">Thông hiểu</option>
-                            <option value="nâng cao">Vận dụng cao</option>
+                        <label class="text-[11px] font-bold text-slate-500 uppercase ml-2 mb-2 block">Mức độ</label>
+                        <select id="quiz-level" class="w-full input-glow p-4 rounded-2xl text-white appearance-none cursor-pointer">
+                            <option value="Cơ bản (Thông hiểu)">Cơ bản</option>
+                            <option value="Vận dụng (Khá)">Vận dụng</option>
+                            <option value="Nâng cao (Vận dụng cao)">Nâng cao</option>
                         </select>
                     </div>
                 </div>
 
-                <button onclick="prepareQuiz()" id="start-btn" class="w-full py-4 bg-sky-500 hover:bg-sky-400 text-slate-900 font-bold rounded-xl transition-all shadow-lg shadow-sky-500/20 active:scale-[0.98]">
-                    Bắt đầu bài thi AI
+                <button onclick="generateQuiz()" id="start-btn" class="w-full p-5 rounded-2xl btn-action text-lg shadow-xl">
+                    Bắt đầu làm bài
                 </button>
             </div>
 
-            <!-- Leaderboard Area -->
-            <div class="pt-6 border-t border-slate-700/50">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xs font-black text-slate-500 uppercase tracking-widest">🏆 Bảng xếp hạng Top 10</h2>
-                    <button onclick="loadLeaderboard()" class="text-[10px] text-sky-400 hover:underline">Làm mới</button>
-                </div>
-                <div id="leaderboard-list" class="space-y-2 max-h-40 overflow-y-auto pr-2">
-                    <p class="text-center text-xs text-slate-600 italic">Đang tải dữ liệu...</p>
+            <div class="pt-6 border-t border-white/5">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-sky-400"></span> Bảng xếp hạng
+                </h3>
+                <div id="leaderboard" class="space-y-3 max-h-[200px] overflow-y-auto pr-2">
+                    <div class="text-center py-4 text-slate-600 text-xs">Đang tải dữ liệu...</div>
                 </div>
             </div>
+        </div>
 
-            <div id="loading-area" class="hidden space-y-4 animate-pulse">
-                <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                    <div class="shimmer h-full w-full"></div>
-                </div>
-                <p class="text-center text-xs text-slate-500 font-medium">AI đang soạn thảo bộ đề riêng cho bạn...</p>
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="hidden premium-card flex flex-col items-center justify-center space-y-6 py-20">
+            <div class="loader"></div>
+            <div class="text-center">
+                <h2 class="text-xl font-bold text-white">AI đang soạn đề...</h2>
+                <p class="text-slate-400 text-sm mt-1">Quá trình này mất khoảng 3-5 giây</p>
             </div>
         </div>
 
         <!-- Quiz Screen -->
-        <div id="quiz-screen" class="hidden glass-panel rounded-3xl p-8 space-y-6 relative overflow-hidden">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div id="timer" class="text-sm font-mono font-bold text-sky-400 bg-sky-500/10 px-3 py-1 rounded-lg">00:00</div>
-                    <div id="progress-tag" class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Câu 1/10</div>
-                </div>
-                <div id="score-tag" class="text-xs font-bold text-emerald-400">Đúng: 0</div>
+        <div id="quiz-screen" class="hidden premium-card space-y-6">
+            <div class="flex items-center justify-between">
+                <span id="quiz-info" class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">CÂU HỎI 1 / 10</span>
+                <span id="timer" class="text-sm font-black text-sky-400 tabular-nums">00:00</span>
+            </div>
+            
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill" style="width: 10%"></div>
             </div>
 
-            <div class="min-h-[100px]">
-                <h2 id="question-text" class="text-lg md:text-xl font-semibold text-slate-100 leading-relaxed"></h2>
+            <div id="question-area" class="py-4">
+                <p id="question-text" class="text-xl font-bold text-slate-100 leading-relaxed"></p>
             </div>
 
-            <div id="options-container" class="grid grid-cols-1 gap-3"></div>
+            <div id="options-area" class="space-y-3"></div>
         </div>
 
         <!-- Result Screen -->
-        <div id="result-screen" class="hidden glass-panel rounded-3xl p-8 text-center space-y-6">
-            <div class="text-5xl">🎯</div>
-            <h2 class="text-2xl font-bold text-white">Kết quả bài thi</h2>
-            <div class="flex justify-center gap-4">
-                <div class="bg-slate-800/50 p-4 rounded-2xl w-1/2 border border-slate-700">
-                    <p class="text-[10px] text-slate-500 uppercase font-black">Điểm số</p>
-                    <p id="final-score" class="text-2xl font-bold text-sky-400">0/0</p>
+        <div id="result-screen" class="hidden premium-card text-center space-y-8">
+            <div class="text-6xl">🎉</div>
+            <div class="space-y-2">
+                <h2 class="text-3xl font-black text-white">Hoàn thành!</h2>
+                <p id="score-summary" class="text-slate-400 font-medium"></p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-900/50 p-6 rounded-3xl border border-white/5">
+                    <div class="text-[10px] font-bold text-slate-500 uppercase mb-1">Điểm số</div>
+                    <div id="final-points" class="text-3xl font-black text-sky-400">0/0</div>
                 </div>
-                <div class="bg-slate-800/50 p-4 rounded-2xl w-1/2 border border-slate-700">
-                    <p class="text-[10px] text-slate-500 uppercase font-black">Thời gian</p>
-                    <p id="final-time" class="text-2xl font-bold text-white">0s</p>
+                <div class="bg-slate-900/50 p-6 rounded-3xl border border-white/5">
+                    <div class="text-[10px] font-bold text-slate-500 uppercase mb-1">Thời gian</div>
+                    <div id="final-time" class="text-3xl font-black text-white">0s</div>
                 </div>
             </div>
-            <div id="save-status" class="text-[10px] text-slate-500 italic">Đang lưu điểm lên hệ thống...</div>
-            <button onclick="location.reload()" class="w-full py-4 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-all">Quay lại trang chủ</button>
+            <button onclick="location.reload()" class="w-full p-5 rounded-2xl bg-white text-slate-900 font-bold hover:bg-slate-100 transition-all">Làm bài mới</button>
         </div>
     </div>
 
     <script>
-        // --- CONFIG ---
-        const apiKey = ""; // Gemini API Key
+        const apiKey = "AIzaSyC-HhJtXxvmCCGUpK8WG9LWJnk8hkEiTRg";
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'toan11-ai-quiz';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'toan11-premium';
 
-        let currentQuestions = [];
-        let currentIndex = 0;
+        let questions = [];
+        let currentIdx = 0;
         let score = 0;
-        let seconds = 0;
-        let timerInterval;
-        let isLocked = false;
+        let startTime, timerInterval;
         let userName = "";
 
-        // --- FIREBASE LOGIC ---
-        async function loadLeaderboard() {
-            const list = document.getElementById('leaderboard-list');
-            try {
-                // Sử dụng đường dẫn chuẩn theo yêu cầu bảo mật
-                const snapshot = await db.collection('artifacts').doc(appId)
-                    .collection('public').doc('data').collection('leaderboard')
-                    .get();
-
-                let entries = [];
-                snapshot.forEach(doc => entries.push(doc.data()));
-                
-                // Sắp xếp: Điểm cao nhất, nếu bằng điểm thì thời gian ít nhất
-                entries.sort((a, b) => b.score - a.score || a.time - b.time);
-                entries = entries.slice(0, 10);
-
-                if (entries.length === 0) {
-                    list.innerHTML = `<p class="text-center text-xs text-slate-600">Chưa có dữ liệu xếp hạng.</p>`;
-                    return;
-                }
-
-                list.innerHTML = entries.map((item, i) => `
-                    <div class="flex justify-between items-center p-3 bg-slate-800/30 rounded-xl border border-white/5">
-                        <div class="flex items-center gap-3">
-                            <span class="text-[10px] font-black ${i < 3 ? 'text-sky-400' : 'text-slate-500'}">#${i+1}</span>
-                            <span class="text-xs font-semibold text-slate-300 truncate max-w-[120px]">${item.name}</span>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xs font-bold text-sky-400">${item.score}đ</span>
-                            <span class="text-[9px] text-slate-500 ml-1">(${item.time}s)</span>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (error) {
-                console.error(error);
-                list.innerHTML = `<p class="text-center text-xs text-red-400/50">Không thể tải BXH.</p>`;
+        async function fetchWithRetry(url, options, retries = 5, backoff = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.ok) return await response.json();
+                } catch (err) {}
+                await new Promise(r => setTimeout(r, backoff * Math.pow(2, i)));
             }
+            throw new Error("API Connection Failed");
         }
 
-        async function saveResultToCloud() {
-            const statusEl = document.getElementById('save-status');
-            try {
-                // Đăng nhập ẩn danh để có quyền ghi
-                if (!auth.currentUser) await auth.signInAnonymously();
-                
-                await db.collection('artifacts').doc(appId)
-                    .collection('public').doc('data').collection('leaderboard')
-                    .add({
-                        name: userName,
-                        score: score,
-                        total: currentQuestions.length,
-                        time: seconds,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                
-                statusEl.innerText = "✅ Điểm của bạn đã được lưu!";
-                statusEl.classList.add('text-emerald-400');
-            } catch (error) {
-                console.error(error);
-                statusEl.innerText = "❌ Không thể lưu điểm tự động.";
-            }
-        }
+        async function generateQuiz() {
+            userName = document.getElementById('username').value.trim() || "Người dùng";
+            const topic = document.getElementById('quiz-topic').value;
+            const level = document.getElementById('quiz-level').value;
 
-        // --- AI LOGIC ---
-        async function generateAIQuestions(level, limit) {
-            const systemPrompt = `Bạn là một chuyên gia giáo dục Toán 11 Việt Nam. 
-            Tạo bộ đề trắc nghiệm ${limit} câu, trình độ ${level}. 
-            Nội dung: Lượng giác, Cấp số, Giới hạn, Hình không gian. 
-            Sử dụng LaTeX ($...$ inline, $$...$$ display).
-            JSON duy nhất: [{"q": "câu hỏi", "a": ["đáp án A", "B", "C", "D"], "c": index_đúng_0_3}].`;
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('loading-screen').classList.remove('hidden');
+
+            const prompt = `Bạn là chuyên gia giáo dục. Hãy soạn 10 câu hỏi trắc nghiệm Toán 11, chủ đề: ${topic}, mức độ: ${level}. Định dạng JSON: [{"q": "Câu hỏi (Dùng Latex $ nếu cần)", "a": ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"], "c": index_đúng_0_đến_3}]. Chỉ trả về JSON.`;
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                const data = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Soạn ${limit} câu Toán 11 mức độ ${level}.` }] }],
-                        systemInstruction: { parts: [{ text: systemPrompt }] },
-                        generationConfig: { responseMimeType: "application/json" }
-                    })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
 
-                const result = await response.json();
-                return JSON.parse(result.candidates[0].content.parts[0].text);
-            } catch (error) {
-                throw error;
-            }
-        }
-
-        // --- APP FLOW ---
-        async function prepareQuiz() {
-            userName = document.getElementById('username').value.trim();
-            if (!userName) return alert("Vui lòng nhập tên của bạn");
-
-            const level = document.getElementById('quiz-level').value;
-            const limit = document.getElementById('quiz-limit').value;
-            const startBtn = document.getElementById('start-btn');
-            const loading = document.getElementById('loading-area');
-
-            startBtn.disabled = true;
-            startBtn.classList.add('opacity-50');
-            loading.classList.remove('hidden');
-
-            try {
-                currentQuestions = await generateAIQuestions(level, limit);
+                const rawText = data.candidates[0].content.parts[0].text;
+                questions = JSON.parse(rawText.replace(/```json|```/g, '').trim());
+                
                 startQuiz();
-            } catch (error) {
-                alert("Lỗi kết nối AI. Kiểm tra API Key hoặc thử lại.");
-                startBtn.disabled = false;
-                startBtn.classList.remove('opacity-50');
-                loading.classList.add('hidden');
+            } catch (err) {
+                alert("Không thể kết nối với AI. Vui lòng kiểm tra API Key hoặc thử lại.");
+                location.reload();
             }
         }
 
         function startQuiz() {
-            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('loading-screen').classList.add('hidden');
             document.getElementById('quiz-screen').classList.remove('hidden');
-            currentIndex = 0;
-            score = 0;
-            seconds = 0;
-            startTimer();
-            showQuestion();
+            startTime = Date.now();
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+            renderQuestion();
         }
 
-        function startTimer() {
-            timerInterval = setInterval(() => {
-                seconds++;
-                let m = Math.floor(seconds / 60).toString().padStart(2, '0');
-                let s = (seconds % 60).toString().padStart(2, '0');
-                document.getElementById('timer').innerText = `${m}:${s}`;
-            }, 1000);
+        function updateTimer() {
+            const diff = Math.floor((Date.now() - startTime) / 1000);
+            const m = Math.floor(diff / 60).toString().padStart(2, '0');
+            const s = (diff % 60).toString().padStart(2, '0');
+            document.getElementById('timer').innerText = `${m}:${s}`;
         }
 
-        function renderMath() {
-            renderMathInElement(document.getElementById('quiz-screen'), {
-                delimiters: [
-                    {left: '$$', right: '$$', display: true},
-                    {left: '$', right: '$', display: false}
-                ]
-            });
-        }
-
-        function showQuestion() {
-            isLocked = false;
-            const q = currentQuestions[currentIndex];
-            document.getElementById('progress-tag').innerText = `Câu ${currentIndex + 1}/${currentQuestions.length}`;
+        function renderQuestion() {
+            const q = questions[currentIdx];
+            document.getElementById('quiz-info').innerText = `CÂU HỎI ${currentIdx + 1} / ${questions.length}`;
+            document.getElementById('progress-fill').style.width = `${((currentIdx + 1) / questions.length) * 100}%`;
             document.getElementById('question-text').innerHTML = q.q;
-            
-            const container = document.getElementById('options-container');
-            container.innerHTML = '';
-            
+
+            const optionsDiv = document.getElementById('options-area');
+            optionsDiv.innerHTML = '';
+
             q.a.forEach((opt, i) => {
-                const btn = document.createElement('button');
-                btn.className = "option-btn p-4 text-left rounded-xl text-slate-300 font-medium text-sm flex gap-3 items-center";
-                btn.innerHTML = `<span class="w-6 h-6 flex-shrink-0 flex items-center justify-center rounded-lg bg-slate-800 text-[10px] font-black">${String.fromCharCode(65+i)}</span> <span>${opt}</span>`;
-                btn.onclick = () => checkAnswer(i, btn);
-                container.appendChild(btn);
+                const btn = document.createElement('div');
+                btn.className = "option-card p-4 rounded-xl flex items-center gap-4 group";
+                btn.innerHTML = `
+                    <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 text-[10px] font-black group-hover:bg-sky-500 group-hover:text-slate-900 transition-colors">
+                        ${String.fromCharCode(65 + i)}
+                    </div>
+                    <div class="text-sm font-medium text-slate-300 group-hover:text-white">${opt}</div>
+                `;
+                btn.onclick = () => checkAnswer(i);
+                optionsDiv.appendChild(btn);
             });
-            renderMath();
+
+            renderMathInElement(document.body, { delimiters: [{left: '$', right: '$', display: false}] });
         }
 
-        function checkAnswer(idx, btn) {
-            if (isLocked) return;
-            isLocked = true;
-
-            const q = currentQuestions[currentIndex];
-            const buttons = document.querySelectorAll('.option-btn');
-
-            if (idx === q.c) {
-                score++;
-                btn.classList.add('correct');
-                document.getElementById('score-tag').innerText = `Đúng: ${score}`;
+        function checkAnswer(idx) {
+            if (idx === questions[currentIdx].c) score++;
+            
+            if (currentIdx < questions.length - 1) {
+                currentIdx++;
+                renderQuestion();
             } else {
-                btn.classList.add('wrong');
-                buttons[q.c].classList.add('correct');
+                finishQuiz();
             }
-
-            setTimeout(() => {
-                if (currentIndex < currentQuestions.length - 1) {
-                    currentIndex++;
-                    showQuestion();
-                } else {
-                    finishQuiz();
-                }
-            }, 1200);
         }
 
-        function finishQuiz() {
+        async function finishQuiz() {
             clearInterval(timerInterval);
+            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
             document.getElementById('quiz-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
-            document.getElementById('final-score').innerText = `${score}/${currentQuestions.length}`;
-            document.getElementById('final-time').innerText = `${seconds}s`;
-            saveResultToCloud();
+
+            document.getElementById('final-points').innerText = `${score}/${questions.length}`;
+            document.getElementById('final-time').innerText = `${timeTaken}s`;
+            document.getElementById('score-summary').innerText = score >= 8 ? "Quá tuyệt vời!" : "Khá tốt, hãy cố gắng thêm nhé!";
+
+            try {
+                if (!auth.currentUser) await auth.signInAnonymously();
+                await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').add({
+                    name: userName,
+                    score: score,
+                    time: timeTaken,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                loadLeaderboard();
+            } catch (e) {}
         }
 
-        // Init
+        async function loadLeaderboard() {
+            try {
+                const snap = await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').get();
+                let list = [];
+                snap.forEach(doc => list.push(doc.data()));
+                list.sort((a, b) => b.score - a.score || a.time - b.time);
+
+                const container = document.getElementById('leaderboard');
+                if (list.length === 0) {
+                    container.innerHTML = `<div class="text-center py-4 text-slate-600 text-xs">Chưa có dữ liệu.</div>`;
+                    return;
+                }
+
+                container.innerHTML = list.slice(0, 10).map((item, i) => `
+                    <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                        <div class="flex items-center gap-3">
+                            <span class="text-[10px] font-black text-slate-500">${i+1}</span>
+                            <span class="text-xs font-bold text-slate-200">${item.name}</span>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs font-black text-sky-400">${item.score}/10</div>
+                            <div class="text-[9px] text-slate-500">${item.time}s</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {}
+        }
+
         window.onload = loadLeaderboard;
     </script>
 </body>
