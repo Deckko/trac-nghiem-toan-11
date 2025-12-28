@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn Thi Toán 11 - Hệ Thống Trắc Nghiệm</title>
+    <!-- CSS: Tailwind để giao diện đẹp nhanh chóng -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDK: Để lưu trữ bảng xếp hạng online -->
+    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore-compat.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
+        body { font-family: 'Quicksand', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 1.5rem; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="main-container" class="glass-card w-full max-w-xl shadow-2xl p-6 md:p-10">
+        
+        <!-- MÀN HÌNH 1: ĐĂNG NHẬP & CHỌN CHẾ ĐỘ -->
+        <div id="screen-start" class="space-y-6">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold text-indigo-700 mb-2">TOÁN 11 🏆</h1>
+                <p class="text-gray-500">Nhập tên và chinh phục thử thách ngay!</p>
+            </div>
+
+            <div class="space-y-4">
+                <label class="block font-semibold text-gray-700">Tên của bạn:</label>
+                <input type="text" id="input-name" placeholder="Ví dụ: Nguyễn Văn A" 
+                    class="w-full p-4 border-2 border-indigo-100 rounded-xl focus:border-indigo-500 outline-none transition-all text-lg">
+            </div>
+
+            <div class="space-y-3">
+                <label class="block font-semibold text-gray-700">Chọn mức độ:</label>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <button onclick="handleStart('easy')" class="p-4 bg-emerald-500 text-white font-bold rounded-xl hover:bg-emerald-600 transition-all shadow-lg active:scale-95">DỄ</button>
+                    <button onclick="handleStart('medium')" class="p-4 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-all shadow-lg active:scale-95">VỪA</button>
+                    <button onclick="handleStart('hard')" class="p-4 bg-rose-500 text-white font-bold rounded-xl hover:bg-rose-600 transition-all shadow-lg active:scale-95">KHÓ</button>
+                </div>
+            </div>
+
+            <!-- Bảng xếp hạng thu nhỏ -->
+            <div class="mt-10 border-t pt-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-indigo-800">Bảng Xếp Hạng</h2>
+                    <button onclick="fetchLeaderboard()" class="text-indigo-500 text-sm hover:underline">Tải lại</button>
+                </div>
+                <div id="leaderboard-box" class="space-y-2 max-h-40 overflow-y-auto">
+                    <!-- Data from JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MÀN HÌNH 2: LÀM BÀI TRẮC NGHIỆM -->
+        <div id="screen-quiz" class="hidden space-y-6">
+            <div class="flex justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                <div>
+                    <div id="display-name" class="font-bold text-indigo-700"></div>
+                    <div id="display-mode" class="text-xs uppercase tracking-widest text-indigo-400"></div>
+                </div>
+                <div id="quiz-timer" class="text-2xl font-mono font-bold text-rose-500">00:00</div>
+            </div>
+
+            <div class="space-y-6">
+                <div id="quiz-progress" class="text-center text-sm font-semibold text-gray-400 uppercase">CÂU HỎI 1 / 5</div>
+                <h3 id="question-text" class="text-xl font-semibold text-gray-800 text-center leading-relaxed min-h-[60px]"></h3>
+                <div id="options-box" class="grid gap-3">
+                    <!-- Options from JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MÀN HÌNH 3: KẾT QUẢ -->
+        <div id="screen-result" class="hidden text-center space-y-8 py-10">
+            <div id="result-icon" class="text-7xl animate-bounce">🎊</div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Kết quả của bạn</h2>
+                <div id="result-score" class="text-6xl font-black text-indigo-600 my-4">0 / 0</div>
+                <p id="result-time" class="text-gray-500 font-medium"></p>
+            </div>
+            <button onclick="location.reload()" class="w-full p-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-xl">QUAY LẠI TRANG CHỦ</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- CẤU HÌNH FIREBASE (Dùng giá trị môi trường) ---
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const quizId = typeof __app_id !== 'undefined' ? __app_id : 'toan-11-demo';
+
+        // --- KHO CÂU HỎI ---
+        const DATABASE = {
+            easy: [
+                { q: "Tập giá trị của y = sin x là?", a: ["[-1;1]", "[0;1]", "R", "[-2;2]"], c: 0 },
+                { q: "Cấp số cộng 1, 3, 5... có công sai d = ?", a: ["1", "2", "3", "5"], c: 1 },
+                { q: "lim(1/n) khi n tiến tới vô cùng?", a: ["0", "1", "Vô cực", "Không tồn tại"], c: 0 }
+            ],
+            medium: [
+                { q: "Chu kỳ tuần hoàn của y = cos(2x) là?", a: ["2π", "π", "π/2", "4π"], c: 1 },
+                { q: "Cho CSN u1=2, q=3. Tính u2?", a: ["5", "6", "8", "9"], c: 1 }
+            ],
+            hard: [
+                { q: "Phương trình sin x = 1 có bao nhiêu nghiệm trên [0; 2π]?", a: ["1", "2", "3", "Vô số"], c: 0 },
+                { q: "lim (x^2-1)/(x-1) khi x tiến tới 1?", a: ["0", "1", "2", "Vô cực"], c: 2 }
+            ]
+        };
+
+        // --- TRẠNG THÁI APP ---
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let timer = 0;
+        let interval;
+        let user = "";
+
+        // --- LOGIC ĐIỀU KHIỂN ---
+
+        async function handleStart(mode) {
+            user = document.getElementById('input-name').value.trim();
+            if(!user) {
+                alert("Bạn vui lòng nhập tên trước nhé!");
+                return;
+            }
+
+            currentQuestions = DATABASE[mode].sort(() => Math.random() - 0.5);
+            currentIndex = 0;
+            score = 0;
+            timer = 0;
+
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-quiz').classList.remove('hidden');
+            
+            document.getElementById('display-name').innerText = user;
+            document.getElementById('display-mode').innerText = "Độ khó: " + mode;
+
+            startClock();
+            renderQuestion();
+        }
+
+        function startClock() {
+            interval = setInterval(() => {
+                timer++;
+                let m = Math.floor(timer / 60).toString().padStart(2, '0');
+                let s = (timer % 60).toString().padStart(2, '0');
+                document.getElementById('quiz-timer').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function renderQuestion() {
+            const data = currentQuestions[currentIndex];
+            document.getElementById('quiz-progress').innerText = `CÂU HỎI ${currentIndex + 1} / ${currentQuestions.length}`;
+            document.getElementById('question-text').innerText = data.q;
+            
+            const box = document.getElementById('options-box');
+            box.innerHTML = "";
+            
+            data.a.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = "p-4 text-left border-2 border-gray-100 rounded-xl hover:bg-indigo-50 hover:border-indigo-300 transition-all font-medium text-gray-700";
+                btn.innerText = opt;
+                btn.onclick = () => checkAns(i);
+                box.appendChild(btn);
+            });
+        }
+
+        function checkAns(idx) {
+            if(idx === currentQuestions[currentIndex].c) score++;
+            
+            if(currentIndex < currentQuestions.length - 1) {
+                currentIndex++;
+                renderQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+
+        async function endQuiz() {
+            clearInterval(interval);
+            document.getElementById('screen-quiz').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+            
+            document.getElementById('result-score').innerText = `${score} / ${currentQuestions.length}`;
+            document.getElementById('result-time').innerText = `Thời gian hoàn thành: ${timer} giây`;
+
+            // Lưu điểm lên hệ thống
+            await saveToCloud();
+        }
+
+        async function saveToCloud() {
+            try {
+                // Đăng nhập ẩn danh để có quyền lưu
+                await firebase.auth().signInAnonymously();
+                
+                // Lưu vào đường dẫn theo quy định ( artifacts/{appId}/public/data/leaderboard )
+                await db.collection('artifacts').doc(quizId).collection('public').doc('data').collection('leaderboard').add({
+                    username: user,
+                    score: score,
+                    time: timer,
+                    at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (e) {
+                console.error("Lỗi lưu điểm:", e);
+            }
+        }
+
+        async function fetchLeaderboard() {
+            const box = document.getElementById('leaderboard-box');
+            box.innerHTML = "<p class='text-center text-gray-400'>Đang tải dữ liệu...</p>";
+            
+            try {
+                const snap = await db.collection('artifacts').doc(quizId).collection('public').doc('data').collection('leaderboard')
+                    .get();
+                
+                let list = [];
+                snap.forEach(d => list.push(d.data()));
+                
+                // Sắp xếp: Điểm cao trước, thời gian ít trước
+                list.sort((a,b) => b.score - a.score || a.time - b.time);
+
+                box.innerHTML = list.slice(0, 5).map((item, i) => `
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span class="font-bold text-gray-700">#${i+1} ${item.username}</span>
+                        <span class="text-indigo-600 font-bold">${item.score} đ (${item.time}s)</span>
+                    </div>
+                `).join('') || "<p class='text-center text-gray-400'>Chưa có kỷ lục nào.</p>";
+            } catch (e) {
+                box.innerHTML = "<p class='text-center text-red-400 text-xs'>Không thể tải bảng xếp hạng.</p>";
+            }
+        }
+
+        // Chạy khi web vừa load
+        window.onload = fetchLeaderboard;
+
+    </script>
+</body>
+</html>
