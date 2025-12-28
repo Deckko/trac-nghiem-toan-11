@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toán 11 - Premium AI Quiz</title>
+    <title>Toán 11 Mastery - AI Learning Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Firebase SDK (Compat) -->
@@ -20,345 +20,404 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
         :root {
-            --bg: #0f172a;
-            --primary: #38bdf8;
-            --accent: #818cf8;
-            --glass: rgba(30, 41, 59, 0.75);
+            --primary: #0ea5e9;
+            --secondary: #6366f1;
+            --bg-dark: #020617;
+            --card-bg: rgba(15, 23, 42, 0.8);
         }
 
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: radial-gradient(circle at top right, #1e293b, #0f172a);
-            color: #f1f5f9;
+            background: var(--bg-dark);
+            color: #f8fafc;
             min-height: 100vh;
+            overflow-x: hidden;
             display: flex;
-            align-items: center;
             justify-content: center;
-            padding: 1.5rem;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Decorative Background Elements */
+        .bg-blob {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, transparent 70%);
+            z-index: -1;
+            filter: blur(50px);
+        }
+
+        /* Container & Glassmorphism */
+        .app-shell {
+            width: 100%;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        @media (min-width: 768px) {
+            .app-shell { grid-template-columns: 320px 1fr; }
         }
 
         .premium-card {
-            background: var(--glass);
-            backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 600px;
-            border-radius: 2rem;
-            padding: 2.5rem;
-        }
-
-        .input-glow {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .input-glow:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
-            outline: none;
-        }
-
-        .btn-action {
-            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
-            color: #0f172a;
-            font-weight: 800;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .btn-action:hover:not(:disabled) {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 12px 24px -6px rgba(56, 189, 248, 0.5);
-        }
-
-        .option-card {
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Buttons & Interactions */
+        .btn-main {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 20px -5px rgba(14, 165, 233, 0.4);
+        }
+
+        .btn-main:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .option-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s;
             cursor: pointer;
-            transition: all 0.2s ease;
         }
 
-        .option-card:hover {
-            background: rgba(255, 255, 255, 0.06);
-            transform: translateX(4px);
-            border-color: rgba(255, 255, 255, 0.2);
+        .option-item:hover {
+            background: rgba(14, 165, 233, 0.1);
+            border-color: var(--primary);
+            transform: scale(1.01);
         }
 
-        .loader {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #1e293b;
-            border-top-color: var(--primary);
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.5s ease forwards; }
+
+        .loader-ring {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(14, 165, 233, 0.1);
+            border-top: 3px solid var(--primary);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            animation: spin 1s linear infinite;
         }
-
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        .progress-bar {
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #38bdf8, #818cf8);
-            transition: width 0.4s ease;
-        }
     </style>
 </head>
 <body>
+    <div class="bg-blob top-[-10%] left-[-10%]"></div>
+    <div class="bg-blob bottom-[-10%] right-[-10%]"></div>
 
-    <div id="app-container">
-        <!-- Setup Screen -->
-        <div id="setup-screen" class="premium-card space-y-8">
-            <div class="text-center space-y-2">
-                <div class="inline-block px-3 py-1 bg-sky-500/10 text-sky-400 text-[10px] font-bold uppercase tracking-widest rounded-full border border-sky-500/20">AI Education System</div>
-                <h1 class="text-4xl font-black text-white">Toán 11 <span class="text-sky-400">Mastery</span></h1>
-                <p class="text-slate-400 text-sm">Học tập thông minh hơn với đề bài được cá nhân hóa.</p>
+    <div class="app-shell animate-fade">
+        
+        <!-- Sidebar: Info & Stats -->
+        <aside class="space-y-6">
+            <div class="premium-card">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center text-xl">📐</div>
+                    <div>
+                        <h1 class="font-black text-lg tracking-tight">TOÁN 11 <span class="text-sky-400">PRO</span></h1>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">AI Power System</p>
+                    </div>
+                </div>
+
+                <div id="user-info-box" class="p-4 bg-slate-900/50 rounded-2xl border border-white/5 mb-4">
+                    <p class="text-[11px] text-slate-500 uppercase font-bold mb-1">Đang đăng nhập</p>
+                    <h3 id="display-name" class="font-bold text-white">Khách tham quan</h3>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-3 bg-white/5 rounded-xl text-center">
+                        <div class="text-[10px] text-slate-500 font-bold uppercase mb-1">Cấp độ</div>
+                        <div class="text-sm font-bold text-sky-400">Học sinh</div>
+                    </div>
+                    <div class="p-3 bg-white/5 rounded-xl text-center">
+                        <div class="text-[10px] text-slate-500 font-bold uppercase mb-1">Hoàn thành</div>
+                        <div class="text-sm font-bold text-emerald-400">--%</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="space-y-5">
+            <div class="premium-card">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span> Bảng xếp hạng
+                </h3>
+                <div id="leaderboard" class="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                    <div class="text-center py-8 text-slate-600 text-xs italic">Đang tải dữ liệu...</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="space-y-6">
+            
+            <!-- Setup Section -->
+            <div id="setup-section" class="premium-card h-full flex flex-col justify-center">
+                <div class="max-w-md mx-auto w-full space-y-8 py-4">
+                    <div class="text-center space-y-2">
+                        <h2 class="text-3xl font-black text-white">Thiết lập bài học</h2>
+                        <p class="text-slate-400 text-sm">AI sẽ dựa trên lựa chọn của bạn để tạo đề.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="relative">
+                            <label class="text-[11px] font-bold text-slate-500 uppercase ml-1 mb-2 block">Họ và tên của bạn</label>
+                            <input type="text" id="username" placeholder="Nhập tên..." class="w-full bg-slate-900/50 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-sky-500 transition-all">
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-500 uppercase ml-1 mb-2 block">Chủ đề cần luyện</label>
+                                <select id="topic" class="w-full bg-slate-900/50 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-sky-500 appearance-none">
+                                    <option value="Hàm số lượng giác">Hàm số lượng giác</option>
+                                    <option value="Dãy số, Cấp số cộng/nhân">Dãy số & Cấp số</option>
+                                    <option value="Giới hạn & Hàm số liên tục">Giới hạn & Liên tục</option>
+                                    <option value="Đạo hàm & Tiếp tuyến">Đạo hàm & Tiếp tuyến</option>
+                                    <option value="Hình học không gian (Quan hệ song song)">Hình học không gian</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-500 uppercase ml-1 mb-2 block">Mức độ khó</label>
+                                <select id="level" class="w-full bg-slate-900/50 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-sky-500 appearance-none">
+                                    <option value="Cơ bản">Cơ bản (7+)</option>
+                                    <option value="Vận dụng">Vận dụng (8+)</option>
+                                    <option value="Nâng cao">Nâng cao (9+)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button onclick="startGeneration()" class="w-full p-5 btn-main rounded-2xl text-slate-950 font-black text-lg mt-4">
+                            TẠO ĐỀ NGAY 🚀
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Section -->
+            <div id="loading-section" class="hidden premium-card h-full flex flex-col items-center justify-center py-20 text-center">
+                <div class="loader-ring mb-6"></div>
+                <h2 class="text-2xl font-black text-white mb-2">Đang khởi tạo câu hỏi</h2>
+                <p class="text-slate-400 max-w-xs mx-auto text-sm leading-relaxed">Hệ thống AI đang phân tích dữ liệu và soạn thảo các câu hỏi Toán học phù hợp cho bạn...</p>
+            </div>
+
+            <!-- Quiz Section -->
+            <div id="quiz-section" class="hidden premium-card space-y-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <span id="q-number" class="px-3 py-1 bg-sky-500/20 text-sky-400 text-xs font-black rounded-lg">CÂU 01</span>
+                        <div class="h-1 w-32 bg-slate-800 rounded-full overflow-hidden">
+                            <div id="progress" class="h-full bg-sky-500 transition-all duration-500" style="width: 10%"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-slate-500 font-bold uppercase">Thời gian</span>
+                        <span id="timer" class="text-lg font-black tabular-nums text-white">00:00</span>
+                    </div>
+                </div>
+
+                <div id="question-box" class="py-8 border-y border-white/5">
+                    <p id="question-text" class="text-xl md:text-2xl font-bold leading-relaxed text-slate-100"></p>
+                </div>
+
+                <div id="options-box" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Options injected here -->
+                </div>
+            </div>
+
+            <!-- Result Section -->
+            <div id="result-section" class="hidden premium-card text-center space-y-8 py-12">
+                <div class="relative inline-block">
+                    <div class="text-7xl">🏆</div>
+                    <div class="absolute inset-0 animate-ping rounded-full bg-sky-500/20"></div>
+                </div>
                 <div>
-                    <label class="text-[11px] font-bold text-slate-500 uppercase ml-2 mb-2 block">Tên của bạn</label>
-                    <input type="text" id="username" placeholder="Ví dụ: Minh Anh" class="w-full input-glow p-4 rounded-2xl text-white">
+                    <h2 class="text-4xl font-black text-white mb-2">Hoàn thành bài luyện!</h2>
+                    <p class="text-slate-400">Kết quả của bạn đã được lưu vào hệ thống</p>
                 </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[11px] font-bold text-slate-500 uppercase ml-2 mb-2 block">Chủ đề</label>
-                        <select id="quiz-topic" class="w-full input-glow p-4 rounded-2xl text-white appearance-none cursor-pointer">
-                            <option value="Hàm số lượng giác">Hàm số lượng giác</option>
-                            <option value="Dãy số, Cấp số cộng/nhân">Dãy số & Cấp số</option>
-                            <option value="Giới hạn & Hàm số liên tục">Giới hạn & Liên tục</option>
-                            <option value="Hình học không gian">Hình học không gian</option>
-                            <option value="Toàn bộ chương trình">Tổng hợp kiến thức</option>
-                        </select>
+                
+                <div class="flex flex-wrap justify-center gap-6">
+                    <div class="text-center">
+                        <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Điểm số</p>
+                        <p id="res-score" class="text-4xl font-black text-sky-400">0/10</p>
                     </div>
-                    <div>
-                        <label class="text-[11px] font-bold text-slate-500 uppercase ml-2 mb-2 block">Mức độ</label>
-                        <select id="quiz-level" class="w-full input-glow p-4 rounded-2xl text-white appearance-none cursor-pointer">
-                            <option value="Cơ bản (Thông hiểu)">Cơ bản</option>
-                            <option value="Vận dụng (Khá)">Vận dụng</option>
-                            <option value="Nâng cao (Vận dụng cao)">Nâng cao</option>
-                        </select>
+                    <div class="w-[1px] h-12 bg-white/10 hidden md:block"></div>
+                    <div class="text-center">
+                        <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Thời gian</p>
+                        <p id="res-time" class="text-4xl font-black text-white">0s</p>
+                    </div>
+                    <div class="w-[1px] h-12 bg-white/10 hidden md:block"></div>
+                    <div class="text-center">
+                        <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Độ chính xác</p>
+                        <p id="res-acc" class="text-4xl font-black text-emerald-400">0%</p>
                     </div>
                 </div>
 
-                <button onclick="generateQuiz()" id="start-btn" class="w-full p-5 rounded-2xl btn-action text-lg shadow-xl">
-                    Bắt đầu làm bài
+                <button onclick="location.reload()" class="btn-main px-12 py-5 rounded-2xl font-black text-slate-900 mx-auto">
+                    THỬ LẠI CHỦ ĐỀ KHÁC
                 </button>
             </div>
 
-            <div class="pt-6 border-t border-white/5">
-                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-sky-400"></span> Bảng xếp hạng
-                </h3>
-                <div id="leaderboard" class="space-y-3 max-h-[200px] overflow-y-auto pr-2">
-                    <div class="text-center py-4 text-slate-600 text-xs">Đang tải dữ liệu...</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Loading Screen -->
-        <div id="loading-screen" class="hidden premium-card flex flex-col items-center justify-center space-y-6 py-20">
-            <div class="loader"></div>
-            <div class="text-center">
-                <h2 class="text-xl font-bold text-white">AI đang soạn đề...</h2>
-                <p class="text-slate-400 text-sm mt-1">Quá trình này mất khoảng 3-5 giây</p>
-            </div>
-        </div>
-
-        <!-- Quiz Screen -->
-        <div id="quiz-screen" class="hidden premium-card space-y-6">
-            <div class="flex items-center justify-between">
-                <span id="quiz-info" class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">CÂU HỎI 1 / 10</span>
-                <span id="timer" class="text-sm font-black text-sky-400 tabular-nums">00:00</span>
-            </div>
-            
-            <div class="progress-bar">
-                <div id="progress-fill" class="progress-fill" style="width: 10%"></div>
-            </div>
-
-            <div id="question-area" class="py-4">
-                <p id="question-text" class="text-xl font-bold text-slate-100 leading-relaxed"></p>
-            </div>
-
-            <div id="options-area" class="space-y-3"></div>
-        </div>
-
-        <!-- Result Screen -->
-        <div id="result-screen" class="hidden premium-card text-center space-y-8">
-            <div class="text-6xl">🎉</div>
-            <div class="space-y-2">
-                <h2 class="text-3xl font-black text-white">Hoàn thành!</h2>
-                <p id="score-summary" class="text-slate-400 font-medium"></p>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-slate-900/50 p-6 rounded-3xl border border-white/5">
-                    <div class="text-[10px] font-bold text-slate-500 uppercase mb-1">Điểm số</div>
-                    <div id="final-points" class="text-3xl font-black text-sky-400">0/0</div>
-                </div>
-                <div class="bg-slate-900/50 p-6 rounded-3xl border border-white/5">
-                    <div class="text-[10px] font-bold text-slate-500 uppercase mb-1">Thời gian</div>
-                    <div id="final-time" class="text-3xl font-black text-white">0s</div>
-                </div>
-            </div>
-            <button onclick="location.reload()" class="w-full p-5 rounded-2xl bg-white text-slate-900 font-bold hover:bg-slate-100 transition-all">Làm bài mới</button>
-        </div>
+        </main>
     </div>
 
     <script>
-        const apiKey = "AIzaSyC-HhJtXxvmCCGUpK8WG9LWJnk8hkEiTRg";
+        const API_KEY = "AIzaSyC-HhJtXxvmCCGUpK8WG9LWJnk8hkEiTRg";
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'toan11-premium';
+        const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'toan11-premium-v2';
 
-        let questions = [];
+        let quizData = [];
         let currentIdx = 0;
         let score = 0;
-        let startTime, timerInterval;
+        let timer = 0;
+        let timerInterval;
         let userName = "";
 
-        async function fetchWithRetry(url, options, retries = 5, backoff = 1000) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, options);
-                    if (response.ok) return await response.json();
-                } catch (err) {}
-                await new Promise(r => setTimeout(r, backoff * Math.pow(2, i)));
-            }
-            throw new Error("API Connection Failed");
-        }
+        async function startGeneration() {
+            userName = document.getElementById('username').value.trim() || "Học sinh ẩn danh";
+            const topic = document.getElementById('topic').value;
+            const level = document.getElementById('level').value;
 
-        async function generateQuiz() {
-            userName = document.getElementById('username').value.trim() || "Người dùng";
-            const topic = document.getElementById('quiz-topic').value;
-            const level = document.getElementById('quiz-level').value;
+            document.getElementById('display-name').innerText = userName;
+            document.getElementById('setup-section').classList.add('hidden');
+            document.getElementById('loading-section').classList.remove('hidden');
 
-            document.getElementById('setup-screen').classList.add('hidden');
-            document.getElementById('loading-screen').classList.remove('hidden');
-
-            const prompt = `Bạn là chuyên gia giáo dục. Hãy soạn 10 câu hỏi trắc nghiệm Toán 11, chủ đề: ${topic}, mức độ: ${level}. Định dạng JSON: [{"q": "Câu hỏi (Dùng Latex $ nếu cần)", "a": ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"], "c": index_đúng_0_đến_3}]. Chỉ trả về JSON.`;
+            const systemPrompt = "Bạn là một giảng viên Toán 11 chuyên nghiệp. Hãy soạn đề trắc nghiệm.";
+            const userPrompt = `Tạo 10 câu hỏi trắc nghiệm Toán 11. Chủ đề: ${topic}. Mức độ: ${level}. Định dạng JSON: [{"q":"Câu hỏi có LaTeX","a":["A","B","C","D"],"c":index_đúng_0_đến_3}]. Lưu ý: Dùng dấu $ cho công thức Toán. Trả về duy nhất JSON.`;
 
             try {
-                const data = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: userPrompt }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] }
+                    })
                 });
 
-                const rawText = data.candidates[0].content.parts[0].text;
-                questions = JSON.parse(rawText.replace(/```json|```/g, '').trim());
+                const data = await response.json();
+                const text = data.candidates[0].content.parts[0].text;
+                quizData = JSON.parse(text.replace(/```json|```/g, '').trim());
                 
-                startQuiz();
+                initQuiz();
             } catch (err) {
-                alert("Không thể kết nối với AI. Vui lòng kiểm tra API Key hoặc thử lại.");
+                console.error(err);
+                alert("Lỗi kết nối AI. Vui lòng thử lại sau giây lát.");
                 location.reload();
             }
         }
 
-        function startQuiz() {
-            document.getElementById('loading-screen').classList.add('hidden');
-            document.getElementById('quiz-screen').classList.remove('hidden');
-            startTime = Date.now();
-            updateTimer();
-            timerInterval = setInterval(updateTimer, 1000);
-            renderQuestion();
+        function initQuiz() {
+            document.getElementById('loading-section').classList.add('hidden');
+            document.getElementById('quiz-section').classList.remove('hidden');
+            
+            timerInterval = setInterval(() => {
+                timer++;
+                const m = Math.floor(timer / 60).toString().padStart(2, '0');
+                const s = (timer % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${m}:${s}`;
+            }, 1000);
+
+            showQuestion();
         }
 
-        function updateTimer() {
-            const diff = Math.floor((Date.now() - startTime) / 1000);
-            const m = Math.floor(diff / 60).toString().padStart(2, '0');
-            const s = (diff % 60).toString().padStart(2, '0');
-            document.getElementById('timer').innerText = `${m}:${s}`;
-        }
-
-        function renderQuestion() {
-            const q = questions[currentIdx];
-            document.getElementById('quiz-info').innerText = `CÂU HỎI ${currentIdx + 1} / ${questions.length}`;
-            document.getElementById('progress-fill').style.width = `${((currentIdx + 1) / questions.length) * 100}%`;
+        function showQuestion() {
+            const q = quizData[currentIdx];
+            document.getElementById('q-number').innerText = `CÂU ${String(currentIdx + 1).padStart(2, '0')}`;
+            document.getElementById('progress').style.width = `${((currentIdx + 1) / quizData.length) * 100}%`;
             document.getElementById('question-text').innerHTML = q.q;
 
-            const optionsDiv = document.getElementById('options-area');
-            optionsDiv.innerHTML = '';
+            const box = document.getElementById('options-box');
+            box.innerHTML = '';
 
             q.a.forEach((opt, i) => {
-                const btn = document.createElement('div');
-                btn.className = "option-card p-4 rounded-xl flex items-center gap-4 group";
-                btn.innerHTML = `
-                    <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 text-[10px] font-black group-hover:bg-sky-500 group-hover:text-slate-900 transition-colors">
+                const div = document.createElement('div');
+                div.className = "option-item p-5 rounded-2xl flex items-center gap-4 animate-fade";
+                div.innerHTML = `
+                    <div class="w-10 h-10 flex-shrink-0 bg-slate-800 rounded-xl flex items-center justify-center font-black text-sky-500 border border-white/5">
                         ${String.fromCharCode(65 + i)}
                     </div>
-                    <div class="text-sm font-medium text-slate-300 group-hover:text-white">${opt}</div>
+                    <div class="text-slate-200 font-medium">${opt}</div>
                 `;
-                btn.onclick = () => checkAnswer(i);
-                optionsDiv.appendChild(btn);
+                div.onclick = () => handleAnswer(i);
+                box.appendChild(div);
             });
 
             renderMathInElement(document.body, { delimiters: [{left: '$', right: '$', display: false}] });
         }
 
-        function checkAnswer(idx) {
-            if (idx === questions[currentIdx].c) score++;
-            
-            if (currentIdx < questions.length - 1) {
+        function handleAnswer(choiceIdx) {
+            if (choiceIdx === quizData[currentIdx].c) score++;
+
+            if (currentIdx < quizData.length - 1) {
                 currentIdx++;
-                renderQuestion();
+                showQuestion();
             } else {
-                finishQuiz();
+                showResult();
             }
         }
 
-        async function finishQuiz() {
+        async function showResult() {
             clearInterval(timerInterval);
-            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-            document.getElementById('quiz-screen').classList.add('hidden');
-            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('quiz-section').classList.add('hidden');
+            document.getElementById('result-section').classList.remove('hidden');
 
-            document.getElementById('final-points').innerText = `${score}/${questions.length}`;
-            document.getElementById('final-time').innerText = `${timeTaken}s`;
-            document.getElementById('score-summary').innerText = score >= 8 ? "Quá tuyệt vời!" : "Khá tốt, hãy cố gắng thêm nhé!";
+            document.getElementById('res-score').innerText = `${score}/${quizData.length}`;
+            document.getElementById('res-time').innerText = `${timer}s`;
+            document.getElementById('res-acc').innerText = `${(score / quizData.length) * 100}%`;
 
+            // Save to Firestore
             try {
                 if (!auth.currentUser) await auth.signInAnonymously();
-                await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').add({
+                const userId = auth.currentUser.uid;
+                await db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('leaderboard').add({
                     name: userName,
                     score: score,
-                    time: timeTaken,
+                    time: timer,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 loadLeaderboard();
-            } catch (e) {}
+            } catch (e) {
+                console.error(e);
+            }
         }
 
         async function loadLeaderboard() {
             try {
-                const snap = await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard').get();
-                let list = [];
-                snap.forEach(doc => list.push(doc.data()));
-                list.sort((a, b) => b.score - a.score || a.time - b.time);
+                const snapshot = await db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('leaderboard').get();
+                let results = [];
+                snapshot.forEach(doc => results.push(doc.data()));
+                
+                results.sort((a, b) => b.score - a.score || a.time - b.time);
 
-                const container = document.getElementById('leaderboard');
-                if (list.length === 0) {
-                    container.innerHTML = `<div class="text-center py-4 text-slate-600 text-xs">Chưa có dữ liệu.</div>`;
+                const list = document.getElementById('leaderboard');
+                if (results.length === 0) {
+                    list.innerHTML = `<p class="text-center py-8 text-slate-600 text-xs italic">Chưa có ai tham gia.</p>`;
                     return;
                 }
 
-                container.innerHTML = list.slice(0, 10).map((item, i) => `
-                    <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                list.innerHTML = results.slice(0, 10).map((r, i) => `
+                    <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 animate-fade">
                         <div class="flex items-center gap-3">
-                            <span class="text-[10px] font-black text-slate-500">${i+1}</span>
-                            <span class="text-xs font-bold text-slate-200">${item.name}</span>
+                            <span class="text-[10px] font-black ${i < 3 ? 'text-sky-400' : 'text-slate-600'}">#${i+1}</span>
+                            <span class="text-xs font-bold text-slate-300 truncate max-w-[100px]">${r.name}</span>
                         </div>
                         <div class="text-right">
-                            <div class="text-xs font-black text-sky-400">${item.score}/10</div>
-                            <div class="text-[9px] text-slate-500">${item.time}s</div>
+                            <div class="text-xs font-black text-sky-400">${r.score}/10</div>
+                            <div class="text-[9px] text-slate-500 font-bold">${r.time}s</div>
                         </div>
                     </div>
                 `).join('');
